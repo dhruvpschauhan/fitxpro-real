@@ -107,12 +107,11 @@ function computeGoals(profile, latestWeight) {
   }
 }
 
-function getTodayKey() {
-  const d = new Date()
-  return `fitxpro_nutrition_${d.getFullYear()}_${d.getMonth()}_${d.getDate()}`
-}
+import useAuthStore from '../../store/authStore'
 
 export default function MemberNutrition() {
+  const { user } = useAuthStore()
+  const todayKey = `fitxpro_nutrition_${user?.username}_${new Date().getFullYear()}_${new Date().getMonth()}_${new Date().getDate()}`
   const [profile, setProfile] = useState(null)
   const [latestWeight, setLatestWeight] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -120,7 +119,7 @@ export default function MemberNutrition() {
   const [setupForm, setSetupForm] = useState({ age: 25, height_cm: 170, gender: 'male', activity_level: 'moderate', goal_type: 'maintenance' })
   const [saving, setSaving] = useState(false)
 
-  const todayKey = getTodayKey()
+
   const [logged, setLogged] = useState(() => {
     const saved = localStorage.getItem(todayKey)
     if (saved) return JSON.parse(saved)

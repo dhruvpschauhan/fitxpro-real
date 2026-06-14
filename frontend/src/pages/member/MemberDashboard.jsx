@@ -48,7 +48,7 @@ export default function MemberDashboard() {
 
   // Calculate calories consumed from localStorage
   const d = new Date()
-  const todayKey = `fitxpro_nutrition_${d.getFullYear()}_${d.getMonth()}_${d.getDate()}`
+  const todayKey = `fitxpro_nutrition_${user?.username}_${d.getFullYear()}_${d.getMonth()}_${d.getDate()}`
   const loggedFood = JSON.parse(localStorage.getItem(todayKey) || '[]')
   const DIRECT_ITEMS = [
     'Whole Egg (1 large)', 'Whey Protein (1 scoop)', 'Banana (medium)', 'Dal Makhani (1 bowl)',
