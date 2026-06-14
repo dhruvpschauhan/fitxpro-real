@@ -95,44 +95,43 @@ SEED_DATA = [
 
 def upgrade() -> None:
     conn = op.get_bind()
+    insp = sa.inspect(conn)
 
-    # 1. Create exercise_library table — idempotent (IF NOT EXISTS)
-    conn.execute(sa.text("""
-        CREATE TABLE IF NOT EXISTS exercise_library (
-            id CHAR(32) NOT NULL,
-            name VARCHAR(150) NOT NULL,
-            category VARCHAR(100) NOT NULL,
-            muscle_group VARCHAR(100) NOT NULL,
-            created_by CHAR(32),
-            created_at DATETIME,
-            PRIMARY KEY (id),
-            UNIQUE (name),
-            FOREIGN KEY(created_by) REFERENCES users (id)
+    # 1. Create exercise_library table
+    if not insp.has_table("exercise_library"):
+        op.create_table(
+            "exercise_library",
+            sa.Column("id", sa.String(32), primary_key=True),
+            sa.Column("name", sa.String(150), unique=True, nullable=False),
+            sa.Column("category", sa.String(100), nullable=False),
+            sa.Column("muscle_group", sa.String(100), nullable=False),
+            sa.Column("created_by", sa.String(36), nullable=True),
+            sa.Column("created_at", sa.DateTime(), default=datetime.utcnow)
         )
-    """))
 
-    # 2. Seed data — idempotent (INSERT OR IGNORE)
-    now = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
-    for name, category, muscle_group in SEED_DATA:
-        conn.execute(sa.text(
-            "INSERT OR IGNORE INTO exercise_library (id, name, category, muscle_group, created_by, created_at) "
-            "VALUES (:id, :name, :category, :muscle_group, NULL, :now)"
-        ), {"id": uuid.uuid4().hex, "name": name, "category": category, "muscle_group": muscle_group, "now": now})
+        # 2. Seed data
+        now = datetime.utcnow()
+        for name, category, muscle_group in SEED_DATA:
+            conn.execute(sa.text(
+                "INSERT INTO exercise_library (id, name, category, muscle_group, created_at) "
+                "VALUES (:id, :name, :category, :muscle_group, :now)"
+            ), {"id": uuid.uuid4().hex, "name": name, "category": category, "muscle_group": muscle_group, "now": now})
 
-    # 3. Add library_id to exercises — idempotent via batch_alter
-    # Check if column already exists before adding
-    result = conn.execute(sa.text("PRAGMA table_info(exercises)"))
-    columns = [row[1] for row in result]
-    if 'library_id' not in columns:
-        with op.batch_alter_table('exercises', schema=None) as batch_op:
-            batch_op.add_column(sa.Column('library_id', sa.String(32), nullable=True))
+    # 3. Add library_id to exercises
+    if "exercises" in insp.get_table_names():
+        columns = [col['name'] for col in insp.get_columns("exercises")]
+        if 'library_id' not in columns:
+            with op.batch_alter_table('exercises', schema=None) as batch_op:
+                batch_op.add_column(sa.Column('library_id', sa.String(32), nullable=True))
 
 
 def downgrade() -> None:
     conn = op.get_bind()
-    result = conn.execute(sa.text("PRAGMA table_info(exercises)"))
-    columns = [row[1] for row in result]
-    if 'library_id' in columns:
-        with op.batch_alter_table('exercises', schema=None) as batch_op:
-            batch_op.drop_column('library_id')
-    op.execute(sa.text("DROP TABLE IF EXISTS exercise_library"))
+    insp = sa.inspect(conn)
+    if "exercises" in insp.get_table_names():
+        columns = [col['name'] for col in insp.get_columns("exercises")]
+        if 'library_id' in columns:
+            with op.batch_alter_table('exercises', schema=None) as batch_op:
+                batch_op.drop_column('library_id')
+    if insp.has_table("exercise_library"):
+        op.drop_table("exercise_library")

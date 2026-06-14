@@ -49,18 +49,18 @@ async def seed_data():
             session.add(day1)
             await session.flush()
             session.add_all([
-                Exercise(workout_day_id=day1.id, name='Barbell Bench Press', sets=4, reps='8-10', rest_seconds=90, sort_order=0),
-                Exercise(workout_day_id=day1.id, name='Overhead Press', sets=3, reps='8-12', rest_seconds=90, sort_order=1),
-                Exercise(workout_day_id=day1.id, name='Incline Dumbbell Press', sets=3, reps='10-12', rest_seconds=60, sort_order=2)
+                Exercise(workout_day_id=day1.id, name='Barbell Bench Press', sets='4', reps='8-10', rest_seconds=90, sort_order=0),
+                Exercise(workout_day_id=day1.id, name='Overhead Press', sets='3', reps='8-12', rest_seconds=90, sort_order=1),
+                Exercise(workout_day_id=day1.id, name='Incline Dumbbell Press', sets='3', reps='10-12', rest_seconds=60, sort_order=2)
             ])
             
             day2 = WorkoutDay(plan_id=w_plan.id, day_label='Day 2', focus='Pull', sort_order=1)
             session.add(day2)
             await session.flush()
             session.add_all([
-                Exercise(workout_day_id=day2.id, name='Barbell Row', sets=4, reps='8-10', rest_seconds=90, sort_order=0),
-                Exercise(workout_day_id=day2.id, name='Lat Pulldown', sets=3, reps='10-12', rest_seconds=60, sort_order=1),
-                Exercise(workout_day_id=day2.id, name='Barbell Curls', sets=3, reps='12-15', rest_seconds=60, sort_order=2)
+                Exercise(workout_day_id=day2.id, name='Barbell Row', sets='4', reps='8-10', rest_seconds=90, sort_order=0),
+                Exercise(workout_day_id=day2.id, name='Lat Pulldown', sets='3', reps='10-12', rest_seconds=60, sort_order=1),
+                Exercise(workout_day_id=day2.id, name='Barbell Curls', sets='3', reps='12-15', rest_seconds=60, sort_order=2)
             ])
 
         await session.commit()

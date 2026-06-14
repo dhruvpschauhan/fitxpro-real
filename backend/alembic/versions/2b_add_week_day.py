@@ -16,13 +16,19 @@ depends_on = None
 
 def upgrade() -> None:
     conn = op.get_bind()
-    result = conn.execute(sa.text("PRAGMA table_info(workout_days)"))
-    columns = [row[1] for row in result]
-    if 'week_day' not in columns:
-        with op.batch_alter_table('workout_days', schema=None) as batch_op:
-            batch_op.add_column(sa.Column('week_day', sa.String(20), nullable=True))
+    insp = sa.inspect(conn)
+    if "workout_days" in insp.get_table_names():
+        columns = [col['name'] for col in insp.get_columns("workout_days")]
+        if 'week_day' not in columns:
+            with op.batch_alter_table('workout_days', schema=None) as batch_op:
+                batch_op.add_column(sa.Column('week_day', sa.String(20), nullable=True))
 
 
 def downgrade() -> None:
-    with op.batch_alter_table('workout_days', schema=None) as batch_op:
-        batch_op.drop_column('week_day')
+    conn = op.get_bind()
+    insp = sa.inspect(conn)
+    if "workout_days" in insp.get_table_names():
+        columns = [col['name'] for col in insp.get_columns("workout_days")]
+        if 'week_day' in columns:
+            with op.batch_alter_table('workout_days', schema=None) as batch_op:
+                batch_op.drop_column('week_day')
