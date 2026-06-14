@@ -48,7 +48,11 @@ export default function ProgramDetail() {
     try {
       await client.post('/user/workout/my-program', { program_id: id })
       setActiveId(id)
-    } catch (e) { console.error(e) }
+      navigate('/app/workouts')
+    } catch (e) { 
+      console.error(e)
+      alert("Failed to select program. If this persists, please ensure your backend is up to date!")
+    }
     finally { setSelecting(false) }
   }
 
