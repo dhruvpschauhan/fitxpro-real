@@ -174,7 +174,7 @@ async def select_program(
         select(UserProgramSelection).where(UserProgramSelection.user_id == current_user.id)
     )
     sel = existing.scalars().first()
-    now = datetime.now(timezone.utc)
+    now = datetime.utcnow()
     if sel:
         sel.program_id = body.program_id
         sel.selected_at = now
@@ -214,9 +214,9 @@ async def get_today_workout(
     # 2. Fall back to cyclic
     if day is None:
         selected_at = sel.selected_at
-        if selected_at.tzinfo is None:
-            selected_at = selected_at.replace(tzinfo=timezone.utc)
-        days_elapsed = (datetime.now(timezone.utc).date() - selected_at.date()).days
+        if selected_at.tzinfo is not None:
+            selected_at = selected_at.replace(tzinfo=None)
+        days_elapsed = (datetime.utcnow().date() - selected_at.date()).days
         day = days[days_elapsed % total]
 
     idx = days.index(day)
