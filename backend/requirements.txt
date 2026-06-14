@@ -13,3 +13,4 @@ apscheduler
 resend>=0.7.0
 httpx
 aiosqlite
+email-validator
