@@ -192,6 +192,16 @@ class UserProfile(Base):
     diet_preference = Column(String(50))
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
 
+class UserNutritionLog(Base):
+    __tablename__ = "user_nutrition_logs"
+    id = Column(Uuid, primary_key=True, default=uuid.uuid4)
+    user_id = Column(Uuid, ForeignKey('users.id', ondelete='CASCADE'))
+    log_date = Column(Date, nullable=False)
+    logged_food = Column(JSON, default=list)
+    water_glasses = Column(Integer, default=0)
+    created_at = Column(DateTime, default=func.now())
+    updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
+
 class FoodItem(Base):
     __tablename__ = "food_items"
     id = Column(Uuid, primary_key=True, default=uuid.uuid4)

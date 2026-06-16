@@ -110,8 +110,6 @@ function computeGoals(profile, latestWeight) {
 import useAuthStore from '../../store/authStore'
 
 export default function MemberNutrition() {
-  const { user } = useAuthStore()
-  const todayKey = user?.username ? `fitxpro_nutrition_${user.username}_${new Date().getFullYear()}_${new Date().getMonth()}_${new Date().getDate()}` : null
   const [profile, setProfile] = useState(null)
   const [latestWeight, setLatestWeight] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -120,45 +118,13 @@ export default function MemberNutrition() {
   const [saving, setSaving] = useState(false)
 
   const [logged, setLogged] = useState([])
-
-  // Load data when todayKey is available
-  useEffect(() => {
-    if (!todayKey) return
-    const saved = localStorage.getItem(todayKey)
-    if (saved) {
-      setLogged(JSON.parse(saved))
-    } else {
-      setLogged([])
-    }
-  }, [todayKey])
-
-  // Save data when logged changes
-  useEffect(() => {
-    if (!todayKey) return
-    localStorage.setItem(todayKey, JSON.stringify(logged))
-  }, [logged, todayKey])
   const [search, setSearch] = useState('')
   const [selectedMeal, setSelectedMeal] = useState('BREAKFAST')
   const [selectedFoods, setSelectedFoods] = useState([])
-
   const [waterGlasses, setWaterGlasses] = useState(0)
 
-  // Load water data when todayKey is available
-  useEffect(() => {
-    if (!todayKey) return
-    const saved = localStorage.getItem(`${todayKey}_water`)
-    if (saved) {
-      setWaterGlasses(parseInt(saved, 10))
-    } else {
-      setWaterGlasses(0)
-    }
-  }, [todayKey])
-
-  // Save water data
-  useEffect(() => {
-    if (!todayKey) return
-    localStorage.setItem(`${todayKey}_water`, waterGlasses.toString())
-  }, [waterGlasses, todayKey])
+  // Remote save flag
+  const [hasChanges, setHasChanges] = useState(false)
 
   const [showPanel, setShowPanel] = useState(false)
   const [expandedMeal, setExpandedMeal] = useState('BREAKFAST')
@@ -167,19 +133,39 @@ export default function MemberNutrition() {
     Promise.all([
       client.get('/user/fitness-profile').then(r => r.data).catch(() => null),
       client.get('/admin/finances/body-metrics').then(r => r.data).catch(() => []),
-    ]).then(([fp, bm]) => {
+      client.get('/user/nutrition-log/today').then(r => r.data).catch(() => null)
+    ]).then(([fp, bm, nutLog]) => {
       setProfile(fp)
       if (fp) setSetupForm({ age: fp.age || 25, height_cm: fp.height_cm || 170, gender: fp.gender || 'male', activity_level: fp.activity_level || 'moderate', goal_type: fp.goal_type || 'maintenance' })
       if (bm?.length) setLatestWeight(parseFloat(bm[bm.length - 1].body_weight_kg))
       if (!fp?.goal_type) setShowSetup(true)
+      
+      if (nutLog) {
+        setLogged(nutLog.logged_food || [])
+        setWaterGlasses(nutLog.water_glasses || 0)
+      }
     }).finally(() => setLoading(false))
   }, [])
+
+  // Background auto-save to cloud
+  useEffect(() => {
+    if (!hasChanges) return
+    const timeout = setTimeout(() => {
+      client.put('/user/nutrition-log/today', {
+        logged_food: logged,
+        water_glasses: waterGlasses
+      }).catch(console.error)
+      setHasChanges(false)
+    }, 1000)
+    return () => clearTimeout(timeout)
+  }, [logged, waterGlasses, hasChanges])
 
   const goals = computeGoals(profile, latestWeight)
   const scale = (food, nutrient, quantity) => DIRECT_ITEMS.includes(food.name) ? food[nutrient] * quantity : (food[nutrient] * quantity) / 100
   const totals = logged.reduce((a, e) => ({ cal: a.cal + scale(e.food, 'cal', e.qty), protein: a.protein + scale(e.food, 'protein', e.qty), carbs: a.carbs + scale(e.food, 'carbs', e.qty), fat: a.fat + scale(e.food, 'fat', e.qty) }), { cal: 0, protein: 0, carbs: 0, fat: 0 })
-  const handleAdd = () => { if (selectedFoods.length === 0) return; setLogged([...logged, ...selectedFoods.map(sf => ({ food: sf.food, meal: selectedMeal, qty: sf.qty }))]); setSelectedFoods([]); setSearch(''); setShowPanel(false) }
-  const handleRemove = (idx) => setLogged(logged.filter((_, i) => i !== idx))
+  const handleAdd = () => { if (selectedFoods.length === 0) return; setLogged([...logged, ...selectedFoods.map(sf => ({ food: sf.food, meal: selectedMeal, qty: sf.qty }))]); setHasChanges(true); setSelectedFoods([]); setSearch(''); setShowPanel(false) }
+  const handleRemove = (idx) => { setLogged(logged.filter((_, i) => i !== idx)); setHasChanges(true) }
+  const handleSetWater = (val) => { setWaterGlasses(val); setHasChanges(true) }
   const filteredFoods = FOOD_DB.filter(f => f.name.toLowerCase().includes(search.toLowerCase()))
 
   const handleSaveProfile = async () => {

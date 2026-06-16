@@ -142,3 +142,75 @@ async def update_fitness_profile(
     await db.commit()
     await db.refresh(profile)
     return profile
+
+
+# ── Nutrition Log endpoints ────────────────────────────
+
+class NutritionLogOut(BaseModel):
+    id: uuid.UUID
+    log_date: date
+    logged_food: list
+    water_glasses: int
+
+    class Config:
+        from_attributes = True
+
+class NutritionLogUpdate(BaseModel):
+    logged_food: list
+    water_glasses: int
+
+
+@router.get("/nutrition-log/today", response_model=NutritionLogOut)
+async def get_today_nutrition_log(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    from app.models.extra_models import UserNutritionLog
+    today = date.today()
+    result = await db.execute(
+        select(UserNutritionLog).where(
+            UserNutritionLog.user_id == current_user.id,
+            UserNutritionLog.log_date == today
+        )
+    )
+    log = result.scalar_one_or_none()
+    if not log:
+        # Return an empty shell, but don't create it in DB until they save
+        return NutritionLogOut(
+            id=uuid.uuid4(),
+            log_date=today,
+            logged_food=[],
+            water_glasses=0
+        )
+    return log
+
+@router.put("/nutrition-log/today", response_model=NutritionLogOut)
+async def update_today_nutrition_log(
+    body: NutritionLogUpdate,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    from app.models.extra_models import UserNutritionLog
+    today = date.today()
+    result = await db.execute(
+        select(UserNutritionLog).where(
+            UserNutritionLog.user_id == current_user.id,
+            UserNutritionLog.log_date == today
+        )
+    )
+    log = result.scalar_one_or_none()
+    if not log:
+        log = UserNutritionLog(
+            user_id=current_user.id,
+            log_date=today,
+            logged_food=body.logged_food,
+            water_glasses=body.water_glasses
+        )
+        db.add(log)
+    else:
+        log.logged_food = body.logged_food
+        log.water_glasses = body.water_glasses
+
+    await db.commit()
+    await db.refresh(log)
+    return log

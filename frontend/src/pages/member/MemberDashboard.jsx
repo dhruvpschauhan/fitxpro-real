@@ -28,6 +28,7 @@ export default function MemberDashboard() {
   const [fitnessProfile, setFitnessProfile] = useState(null)
   const [latestWeight, setLatestWeight] = useState(null)
   const [todayWorkout, setTodayWorkout] = useState(null)
+  const [nutritionLog, setNutritionLog] = useState([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -37,19 +38,19 @@ export default function MemberDashboard() {
       client.get('/user/fitness-profile').then(r => r.data).catch(() => null),
       client.get('/admin/finances/body-metrics').then(r => r.data).catch(() => []),
       client.get('/user/workout/today').then(r => r.data).catch(() => null),
-    ]).then(([m, a, fp, bm, tw]) => {
+      client.get('/user/nutrition-log/today').then(r => r.data).catch(() => null),
+    ]).then(([m, a, fp, bm, tw, nutLog]) => {
       setMembership(m)
       setAnnouncements(a)
       setFitnessProfile(fp)
       if (bm?.length) setLatestWeight(parseFloat(bm[bm.length - 1].body_weight_kg))
       setTodayWorkout(tw)
+      if (nutLog) setNutritionLog(nutLog.logged_food || [])
     }).finally(() => setLoading(false))
   }, [])
 
-  // Calculate calories consumed from localStorage
-  const d = new Date()
-  const todayKey = `fitxpro_nutrition_${user?.username}_${d.getFullYear()}_${d.getMonth()}_${d.getDate()}`
-  const loggedFood = JSON.parse(localStorage.getItem(todayKey) || '[]')
+  // Calculate calories consumed from cloud log
+  const loggedFood = nutritionLog
   const DIRECT_ITEMS = [
     'Whole Egg (1 large)', 'Whey Protein (1 scoop)', 'Banana (medium)', 'Dal Makhani (1 bowl)',
     'Greek Yogurt (200g)', 'Roti / Chapati (1 medium)', 'Toor Dal Cooked (1 bowl)',
