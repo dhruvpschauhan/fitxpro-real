@@ -160,10 +160,7 @@ export default function MemberDashboard() {
 
       <div className="grid-2col">
         {/* Today's Workout */}
-        <div style={{
-          background: '#111', border: '1px solid #1E1E1E', borderRadius: 4,
-          padding: '1.5rem 2rem',
-        }}>
+        <div className="card">
           <p className="text-label" style={{ marginBottom: 12 }}>TODAY'S WORKOUT</p>
           {todayWorkout?.status === 'ok' ? (
             <>
@@ -186,10 +183,7 @@ export default function MemberDashboard() {
         </div>
 
         {/* Body Metrics */}
-        <div style={{
-          background: '#111', border: '1px solid #1E1E1E', borderRadius: 4,
-          padding: '1.5rem 2rem',
-        }}>
+        <div className="card">
           <p className="text-label" style={{ marginBottom: 16 }}>BODY METRICS</p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             {BODY_METRICS.map((m, i) => (
@@ -210,7 +204,7 @@ export default function MemberDashboard() {
 
       <div className="grid-2col" style={{ marginTop: '1.5rem' }}>
         {/* Today's Calories */}
-        <div className="card" style={{ padding: '1.5rem 2rem' }}>
+        <div className="card">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
             <h3 className="text-section" style={{ fontSize: 14 }}>TODAY'S CALORIES</h3>
             <button className="btn-ghost" onClick={() => navigate('/app/nutrition')} style={{ fontSize: 11, padding: '4px 8px' }}>LOG FOOD</button>

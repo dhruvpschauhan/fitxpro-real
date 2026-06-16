@@ -186,47 +186,47 @@ export default function MemberNutrition() {
   if (loading) return <div style={{ padding: '2rem', color: '#444' }}>Loading...</div>
 
   return (
-    <div style={{ padding: '2rem', maxWidth: 1000, margin: '0 auto' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+    <div style={{ padding: '2rem 1rem', maxWidth: 1000, margin: '0 auto' }}>
+      <div className="page-header">
         <div>
           <h1 className="text-page-title">NUTRITION</h1>
           <p style={{ color: '#444', fontSize: 13, marginTop: 4 }}>Calorie targets based on your body metrics and goal</p>
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <button onClick={() => setShowSetup(true)} className="btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: 6 }}><Settings size={14} /> GOAL</button>
-          <button onClick={() => setShowPanel(true)} className="btn-primary"><Plus size={16} strokeWidth={2.5} /> LOG FOOD</button>
+        <div style={{ display: 'flex', gap: 8, width: '100%', justifyContent: 'flex-start' }} className="header-actions">
+          <button onClick={() => setShowSetup(true)} className="btn-secondary" style={{ flex: 1, justifyContent: 'center' }}><Settings size={14} /> GOAL</button>
+          <button onClick={() => setShowPanel(true)} className="btn-primary" style={{ flex: 1, justifyContent: 'center' }}><Plus size={16} strokeWidth={2.5} /> LOG FOOD</button>
         </div>
       </div>
 
       {/* Goal Banner */}
-      <div style={{ background: '#111', border: '1px solid #1E1E1E', borderRadius: 4, padding: '1rem 1.25rem', marginBottom: '1.5rem', borderLeft: '3px solid #E8001D', display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '0.75rem' }}>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1.5rem', alignItems: 'center' }}>
-          <div><p className="text-label-sm">GOAL</p><p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: 18, color: '#E8001D' }}>{GOAL_LABELS[goals.goalType] || 'MAINTENANCE'}</p></div>
+      <div style={{ background: '#111', border: '1px solid #1E1E1E', borderRadius: 4, padding: '1.25rem', marginBottom: '1.5rem', borderLeft: '3px solid #E8001D', display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '1rem' }}>
+        <div className="goal-banner">
+          <div><p className="text-label-sm">GOAL</p><p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: 18, color: '#E8001D', whiteSpace: 'nowrap' }}>{GOAL_LABELS[goals.goalType] || 'MAINTENANCE'}</p></div>
           <div><p className="text-label-sm">WEIGHT</p><p style={{ fontFamily: '"JetBrains Mono", monospace', fontWeight: 500, fontSize: 16 }}>{goals.weight} KG</p></div>
           <div><p className="text-label-sm">TDEE</p><p style={{ fontFamily: '"JetBrains Mono", monospace', fontWeight: 500, fontSize: 16 }}>{goals.tdee} KCAL</p></div>
           <div><p className="text-label-sm">TARGET</p><p style={{ fontFamily: '"JetBrains Mono", monospace', fontWeight: 500, fontSize: 16, color: goals.goalType === 'weight_loss' ? '#22C55E' : goals.goalType === 'maintenance' ? '#F0F0F0' : '#F59E0B' }}>{goals.cal} KCAL</p></div>
         </div>
-        <p style={{ fontSize: 11, color: '#444' }}>{goals.goalType === 'weight_loss' ? '-500 DEFICIT' : goals.goalType === 'weight_gain' ? '+400 SURPLUS' : goals.goalType === 'lean_bulk' ? '+250 SURPLUS' : 'AT MAINTENANCE'}</p>
+        <p style={{ fontSize: 11, color: '#444', width: '100%', textAlign: 'right' }} className="hide-mobile">{goals.goalType === 'weight_loss' ? '-500 DEFICIT' : goals.goalType === 'weight_gain' ? '+400 SURPLUS' : goals.goalType === 'lean_bulk' ? '+250 SURPLUS' : 'AT MAINTENANCE'}</p>
       </div>
 
       {/* Calorie + Macro Row */}
-      <div className="nutrition-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 3fr', gap: '1rem', marginBottom: '2rem' }}>
-        <div className="card-stat" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', borderLeft: '3px solid #E8001D' }}>
+      <div className="nutrition-grid">
+        <div className="card-stat" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', borderLeft: '3px solid #E8001D', padding: '2rem 1rem' }}>
           <p className="text-label" style={{ marginBottom: 8 }}>CALORIES</p>
-          <p className="text-hero-number" style={{ fontSize: 42, color: '#F0F0F0' }}>{Math.round(totals.cal)}</p>
-          <p style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 12, color: '#444', marginTop: 4 }}>/ {goals.cal} KCAL</p>
-          <div className="progress-track" style={{ width: '80%', marginTop: 12 }}>
+          <p className="text-hero-number" style={{ fontSize: 48, color: '#F0F0F0' }}>{Math.round(totals.cal)}</p>
+          <p style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 13, color: '#444', marginTop: 4 }}>/ {goals.cal} KCAL</p>
+          <div className="progress-track" style={{ width: '100%', maxWidth: 200, marginTop: 16 }}>
             <div className="progress-fill" style={{ width: `${Math.min((totals.cal / goals.cal) * 100, 100)}%` }} />
           </div>
-          <p style={{ fontSize: 11, color: '#444', marginTop: 6, fontFamily: '"JetBrains Mono", monospace' }}>{Math.round(goals.cal - totals.cal)} REMAINING</p>
+          <p style={{ fontSize: 12, color: '#666', marginTop: 8, fontFamily: '"JetBrains Mono", monospace' }}>{Math.max(0, Math.round(goals.cal - totals.cal))} REMAINING</p>
         </div>
-        <div className="card" style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'flex-end', padding: '1.5rem 2rem' }}>
+        <div className="card macro-grid">
           {macros.map(m => (
-            <div key={m.label} style={{ textAlign: 'center', flex: 1 }}>
+            <div key={m.label} style={{ textAlign: 'center' }}>
               <p className="text-label" style={{ marginBottom: 10 }}>{m.label}</p>
-              <p style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 28, fontWeight: 500, color: '#F0F0F0', lineHeight: 1 }}>{Math.round(m.val)}</p>
-              <p style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 12, color: '#444', marginTop: 2 }}>/ {m.goal}{m.unit}</p>
-              <div className="progress-track" style={{ marginTop: 10 }}>
+              <p style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 26, fontWeight: 500, color: '#F0F0F0', lineHeight: 1 }}>{Math.round(m.val)}</p>
+              <p style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 11, color: '#555', marginTop: 4 }}>/ {m.goal}{m.unit}</p>
+              <div className="progress-track" style={{ marginTop: 12 }}>
                 <div style={{ height: '100%', borderRadius: 2, background: m.color, transition: 'width 300ms ease', width: `${Math.min((m.val / m.goal) * 100, 100)}%` }} />
               </div>
             </div>
@@ -268,18 +268,18 @@ export default function MemberNutrition() {
               {items.map((entry, idx) => {
                 const gi = logged.indexOf(entry)
                 return (
-                  <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.625rem 1.5rem', borderBottom: '1px solid #141414' }}
+                  <div key={idx} style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.25rem', borderBottom: '1px solid #141414', gap: '0.5rem' }}
                     onMouseOver={e => e.currentTarget.style.background = '#1A1A1A'} onMouseOut={e => e.currentTarget.style.background = 'transparent'}>
-                    <div>
-                      <p style={{ fontSize: 14, fontWeight: 500 }}>{entry.food.name}</p>
-                      <p style={{ fontSize: 11, color: '#444', fontFamily: '"JetBrains Mono", monospace', marginTop: 1 }}>
-                        {entry.qty}{DIRECT_ITEMS.includes(entry.food.name) ? ' SRV' : 'G'} P:{Math.round(scale(entry.food, 'protein', entry.qty))} C:{Math.round(scale(entry.food, 'carbs', entry.qty))} F:{Math.round(scale(entry.food, 'fat', entry.qty))}
+                    <div style={{ flex: '1 1 auto', minWidth: 200 }}>
+                      <p style={{ fontSize: 14, fontWeight: 500, lineHeight: 1.2 }}>{entry.food.name}</p>
+                      <p style={{ fontSize: 12, color: '#666', fontFamily: '"JetBrains Mono", monospace', marginTop: 4 }}>
+                        {entry.qty}{DIRECT_ITEMS.includes(entry.food.name) ? ' SRV' : 'G'} | P:{Math.round(scale(entry.food, 'protein', entry.qty))} C:{Math.round(scale(entry.food, 'carbs', entry.qty))} F:{Math.round(scale(entry.food, 'fat', entry.qty))}
                       </p>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                      <span style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 13, fontWeight: 600, color: '#E8001D' }}>{Math.round(scale(entry.food, 'cal', entry.qty))}</span>
-                      <button type="button" onClick={() => handleRemove(gi)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#333', fontSize: 16 }}
-                        onMouseOver={e => e.currentTarget.style.color = '#E8001D'} onMouseOut={e => e.currentTarget.style.color = '#333'}>x</button>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: '0 0 auto' }}>
+                      <span style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 15, fontWeight: 600, color: '#E8001D' }}>{Math.round(scale(entry.food, 'cal', entry.qty))} KCAL</span>
+                      <button type="button" onClick={() => handleRemove(gi)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#555', fontSize: 18, padding: '0 4px' }}
+                        onMouseOver={e => e.currentTarget.style.color = '#E8001D'} onMouseOut={e => e.currentTarget.style.color = '#555'}>×</button>
                     </div>
                   </div>
                 )
