@@ -1,3 +1,4 @@
+from app.database import Base
 from .user import User
 from .membership_plan import MembershipPlan
 from .membership import Membership
