@@ -202,6 +202,11 @@ async def delete_program(
     db: AsyncSession = Depends(get_db),
     _: User = Depends(require_admin)
 ):
+    # Manually remove user selections to prevent foreign key constraint violations
+    from sqlalchemy import delete
+    from app.models.extra_models import UserProgramSelection
+    await db.execute(delete(UserProgramSelection).where(UserProgramSelection.program_id == program_id))
+    
     prog = await _load_program(program_id, db)
     await db.delete(prog)
     await db.commit()
