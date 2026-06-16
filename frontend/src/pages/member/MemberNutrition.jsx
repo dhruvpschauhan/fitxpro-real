@@ -111,7 +111,7 @@ import useAuthStore from '../../store/authStore'
 
 export default function MemberNutrition() {
   const { user } = useAuthStore()
-  const todayKey = `fitxpro_nutrition_${user?.username}_${new Date().getFullYear()}_${new Date().getMonth()}_${new Date().getDate()}`
+  const todayKey = user?.username ? `fitxpro_nutrition_${user.username}_${new Date().getFullYear()}_${new Date().getMonth()}_${new Date().getDate()}` : null
   const [profile, setProfile] = useState(null)
   const [latestWeight, setLatestWeight] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -119,26 +119,44 @@ export default function MemberNutrition() {
   const [setupForm, setSetupForm] = useState({ age: 25, height_cm: 170, gender: 'male', activity_level: 'moderate', goal_type: 'maintenance' })
   const [saving, setSaving] = useState(false)
 
+  const [logged, setLogged] = useState([])
 
-  const [logged, setLogged] = useState(() => {
-    const saved = localStorage.getItem(todayKey)
-    if (saved) return JSON.parse(saved)
-    return [] // Empty log for a new day
-  })
-
+  // Load data when todayKey is available
   useEffect(() => {
+    if (!todayKey) return
+    const saved = localStorage.getItem(todayKey)
+    if (saved) {
+      setLogged(JSON.parse(saved))
+    } else {
+      setLogged([])
+    }
+  }, [todayKey])
+
+  // Save data when logged changes
+  useEffect(() => {
+    if (!todayKey) return
     localStorage.setItem(todayKey, JSON.stringify(logged))
   }, [logged, todayKey])
   const [search, setSearch] = useState('')
   const [selectedMeal, setSelectedMeal] = useState('BREAKFAST')
   const [selectedFoods, setSelectedFoods] = useState([])
 
-  const [waterGlasses, setWaterGlasses] = useState(() => {
-    const saved = localStorage.getItem(`${todayKey}_water`)
-    return saved ? parseInt(saved, 10) : 0
-  })
+  const [waterGlasses, setWaterGlasses] = useState(0)
 
+  // Load water data when todayKey is available
   useEffect(() => {
+    if (!todayKey) return
+    const saved = localStorage.getItem(`${todayKey}_water`)
+    if (saved) {
+      setWaterGlasses(parseInt(saved, 10))
+    } else {
+      setWaterGlasses(0)
+    }
+  }, [todayKey])
+
+  // Save water data
+  useEffect(() => {
+    if (!todayKey) return
     localStorage.setItem(`${todayKey}_water`, waterGlasses.toString())
   }, [waterGlasses, todayKey])
 
