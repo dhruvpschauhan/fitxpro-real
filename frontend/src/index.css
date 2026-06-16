@@ -634,6 +634,25 @@ input[type="file"].input::file-selector-button:hover {
   }
 }
 
+/* ── Exercise Builder Rows ─────────────────────────────────── */
+.exercise-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  padding: 10px 12px;
+  border-bottom: 1px solid #141414;
+}
+.exercise-row-drag { flex: 0 0 20px; }
+.exercise-row-name { flex: 1 1 180px; min-width: 140px; }
+.exercise-row-inputs { 
+  display: flex; 
+  gap: 8px; 
+  flex: 2 1 250px;
+}
+.exercise-row-inputs > input { flex: 1 1 40px; min-width: 0; }
+.exercise-row-del { flex: 0 0 28px; display: flex; justify-content: flex-end; }
+
 /* Hide on mobile / show on desktop */
 .hide-mobile  { }
 .show-mobile  { display: none; }

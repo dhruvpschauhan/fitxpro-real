@@ -145,31 +145,34 @@ function ExerciseRow({ ex, onSaved, onDelete }) {
   }
 
   return (
-    <div style={{
-      display: 'grid', gridTemplateColumns: '28px 1fr 70px 80px 60px 70px 28px',
-      gap: 8, alignItems: 'center', padding: '10px 12px', borderBottom: '1px solid #141414',
-    }}
+    <div className="exercise-row"
       onMouseOver={e => e.currentTarget.style.background = '#1A1A1A'}
       onMouseOut={e => e.currentTarget.style.background = 'transparent'}
     >
-      <GripVertical size={14} style={{ color: '#333', cursor: 'grab' }} />
-      <input style={{ ...inputStyle, fontWeight: 500 }} value={data.name}
-        onChange={e => handleChange('name', e.target.value)} placeholder="Exercise name" />
-      <input style={{ ...inputStyle, textAlign: 'center', fontFamily: '"JetBrains Mono", monospace', color: '#E8001D' }}
-        value={data.sets} onChange={e => handleChange('sets', e.target.value)} placeholder="Sets" />
-      <input style={{ ...inputStyle, textAlign: 'center', fontFamily: '"JetBrains Mono", monospace', color: '#E8001D' }}
-        value={data.reps} onChange={e => handleChange('reps', e.target.value)} placeholder="Reps" />
-      <input style={{ ...inputStyle, textAlign: 'center', fontFamily: '"JetBrains Mono", monospace', color: '#888' }}
-        value={data.rest_seconds} onChange={e => handleChange('rest_seconds', e.target.value)} placeholder="Rest(s)" type="number" />
-      <input style={{ ...inputStyle, fontSize: 12, color: '#555' }}
-        value={data.notes} onChange={e => handleChange('notes', e.target.value)} placeholder="Notes" />
-      <button type="button" onClick={() => onDelete(ex.id)}
-        style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#333', padding: 4 }}
-        onMouseOver={e => e.currentTarget.style.color = '#E8001D'}
-        onMouseOut={e => e.currentTarget.style.color = '#333'}
-      >
-        <Trash2 size={13} />
-      </button>
+      <div className="exercise-row-drag"><GripVertical size={14} style={{ color: '#333', cursor: 'grab' }} /></div>
+      <div className="exercise-row-name">
+        <input style={{ ...inputStyle, fontWeight: 500 }} value={data.name}
+          onChange={e => handleChange('name', e.target.value)} placeholder="Exercise name" />
+      </div>
+      <div className="exercise-row-inputs">
+        <input style={{ ...inputStyle, textAlign: 'center', fontFamily: '"JetBrains Mono", monospace', color: '#E8001D' }}
+          value={data.sets} onChange={e => handleChange('sets', e.target.value)} placeholder="Sets" />
+        <input style={{ ...inputStyle, textAlign: 'center', fontFamily: '"JetBrains Mono", monospace', color: '#E8001D' }}
+          value={data.reps} onChange={e => handleChange('reps', e.target.value)} placeholder="Reps" />
+        <input style={{ ...inputStyle, textAlign: 'center', fontFamily: '"JetBrains Mono", monospace', color: '#888' }}
+          value={data.rest_seconds} onChange={e => handleChange('rest_seconds', e.target.value)} placeholder="Rest(s)" type="number" />
+        <input style={{ ...inputStyle, fontSize: 12, color: '#555' }}
+          value={data.notes} onChange={e => handleChange('notes', e.target.value)} placeholder="Notes" />
+      </div>
+      <div className="exercise-row-del">
+        <button type="button" onClick={() => onDelete(ex.id)}
+          style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#333', padding: 4 }}
+          onMouseOver={e => e.currentTarget.style.color = '#E8001D'}
+          onMouseOut={e => e.currentTarget.style.color = '#333'}
+        >
+          <Trash2 size={13} />
+        </button>
+      </div>
     </div>
   )
 }
@@ -206,21 +209,25 @@ function AddExerciseForm({ dayId, onDone, onCancel }) {
 
   return (
     <div style={{ padding: '12px 16px', borderTop: '1px solid #1A1A1A', background: '#0E0E0E' }}>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 70px 80px 60px 70px', gap: 8, marginBottom: 8 }}>
-        <ExerciseAutocomplete
-          value={nameQuery}
-          onChange={setNameQuery}
-          onSelect={handleSelect}
-        />
-        <input className="input" style={{ fontSize: 13, textAlign: 'center' }} placeholder="Sets"
-          value={form.sets} onChange={e => setForm(f => ({ ...f, sets: e.target.value }))} />
-        <input className="input" style={{ fontSize: 13, textAlign: 'center' }} placeholder="Reps"
-          value={form.reps} onChange={e => setForm(f => ({ ...f, reps: e.target.value }))} />
-        <input className="input" style={{ fontSize: 13, textAlign: 'center' }} placeholder="Rest(s)"
-          type="number" value={form.rest_seconds}
-          onChange={e => setForm(f => ({ ...f, rest_seconds: e.target.value }))} />
-        <input className="input" style={{ fontSize: 13 }} placeholder="Notes"
-          value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} />
+      <div className="exercise-row" style={{ padding: 0, border: 'none', marginBottom: 8 }}>
+        <div className="exercise-row-name">
+          <ExerciseAutocomplete
+            value={nameQuery}
+            onChange={setNameQuery}
+            onSelect={handleSelect}
+          />
+        </div>
+        <div className="exercise-row-inputs">
+          <input className="input" style={{ fontSize: 13, textAlign: 'center' }} placeholder="Sets"
+            value={form.sets} onChange={e => setForm(f => ({ ...f, sets: e.target.value }))} />
+          <input className="input" style={{ fontSize: 13, textAlign: 'center' }} placeholder="Reps"
+            value={form.reps} onChange={e => setForm(f => ({ ...f, reps: e.target.value }))} />
+          <input className="input" style={{ fontSize: 13, textAlign: 'center' }} placeholder="Rest(s)"
+            type="number" value={form.rest_seconds}
+            onChange={e => setForm(f => ({ ...f, rest_seconds: e.target.value }))} />
+          <input className="input" style={{ fontSize: 13 }} placeholder="Notes"
+            value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} />
+        </div>
       </div>
       {selected && (
         <div style={{ fontSize: 11, color: '#555', marginBottom: 8, fontFamily: '"Inter", sans-serif' }}>
@@ -266,14 +273,14 @@ function DayCard({ day, index, onDeleteDay, onRefresh }) {
 
   return (
     <div style={{ background: '#111', border: '1px solid #1E1E1E', borderRadius: 4, overflow: 'hidden', marginBottom: '0.75rem' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 16px', background: '#131313', borderBottom: '1px solid #1E1E1E' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '8px 10px', padding: '12px 16px', background: '#131313', borderBottom: '1px solid #1E1E1E' }}>
         <GripVertical size={16} style={{ color: '#333', cursor: 'grab', flexShrink: 0 }} />
         <span style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 11, color: '#555', flexShrink: 0 }}>DAY {index + 1}</span>
         <input value={label}
           onChange={e => { setLabel(e.target.value); saveDay({ day_label: e.target.value }) }}
-          style={{ flex: 1, background: 'transparent', border: 'none', color: '#F0F0F0', fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: 16, textTransform: 'uppercase', outline: 'none', minWidth: 80 }}
+          style={{ flex: '1 1 80px', background: 'transparent', border: 'none', color: '#F0F0F0', fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: 16, textTransform: 'uppercase', outline: 'none', minWidth: 80 }}
           placeholder="Day label..." />
-        <span style={{ color: '#333', fontSize: 12 }}>|</span>
+        <span style={{ color: '#333', fontSize: 12 }} className="hide-mobile">|</span>
         <input value={focus}
           onChange={e => { setFocus(e.target.value); saveDay({ focus: e.target.value }) }}
           style={{ flex: 2, background: 'transparent', border: 'none', color: '#888', fontFamily: '"Inter", sans-serif', fontSize: 13, outline: 'none', minWidth: 100 }}
@@ -306,7 +313,7 @@ function DayCard({ day, index, onDeleteDay, onRefresh }) {
       {!collapsed && (
         <>
           {exercises.length > 0 && (
-            <div style={{ display: 'grid', gridTemplateColumns: '28px 1fr 70px 80px 60px 70px 28px', gap: 8, padding: '6px 12px', background: '#0E0E0E', borderBottom: '1px solid #1A1A1A' }}>
+            <div className="hide-mobile" style={{ display: 'grid', gridTemplateColumns: '28px 1fr 70px 80px 60px 70px 28px', gap: 8, padding: '6px 12px', background: '#0E0E0E', borderBottom: '1px solid #1A1A1A' }}>
               {['', 'EXERCISE', 'SETS', 'REPS', 'REST', 'NOTES', ''].map((h, i) => (
                 <span key={i} style={{ fontSize: 10, fontWeight: 500, color: '#444', textTransform: 'uppercase', letterSpacing: '0.08em', textAlign: i >= 2 && i <= 4 ? 'center' : 'left' }}>{h}</span>
               ))}
@@ -403,7 +410,7 @@ export default function WorkoutBuilder() {
   if (!program) return null
 
   return (
-    <div style={{ padding: '2rem', maxWidth: 1000, margin: '0 auto' }}>
+    <div style={{ padding: '2rem 1rem', maxWidth: 1000, margin: '0 auto' }}>
       <button onClick={() => navigate('/admin/workouts')} className="btn-ghost"
         style={{ marginBottom: '1.5rem', padding: 0, display: 'flex', alignItems: 'center', gap: 6 }}>
         <ArrowLeft size={14} /> BACK TO PROGRAMS

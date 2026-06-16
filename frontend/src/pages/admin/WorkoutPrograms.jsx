@@ -59,7 +59,7 @@ export default function WorkoutPrograms() {
   }
 
   return (
-    <div style={{ padding: '2rem', maxWidth: 1100, margin: '0 auto' }}>
+    <div style={{ padding: '2rem 1rem', maxWidth: 1100, margin: '0 auto' }}>
       {/* Header */}
       <div className="page-header">
         <div>
@@ -87,7 +87,7 @@ export default function WorkoutPrograms() {
               style={{
                 background: '#111', border: '1px solid #1E1E1E',
                 borderLeft: `3px solid ${p.is_published ? '#E8001D' : '#333'}`,
-                borderRadius: 4, padding: '1.25rem 1.5rem',
+                borderRadius: 4, padding: '1.25rem 1rem',
                 cursor: 'pointer', transition: 'background 80ms ease',
                 display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                 flexWrap: 'wrap', gap: '1rem',
