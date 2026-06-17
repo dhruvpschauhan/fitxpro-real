@@ -198,72 +198,133 @@ export default function MemberNutrition() {
         </div>
       </div>
 
-      {/* Goal Banner */}
-      <div style={{ background: '#111', border: '1px solid #1E1E1E', borderRadius: 4, padding: '1.25rem', marginBottom: '1.5rem', borderLeft: '3px solid #E8001D', display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '1rem' }}>
-        <div className="goal-banner">
-          <div><p className="text-label-sm">GOAL</p><p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: 18, color: '#E8001D', whiteSpace: 'nowrap' }}>{GOAL_LABELS[goals.goalType] || 'MAINTENANCE'}</p></div>
-          <div><p className="text-label-sm">WEIGHT</p><p style={{ fontFamily: '"JetBrains Mono", monospace', fontWeight: 500, fontSize: 16 }}>{goals.weight} KG</p></div>
-          <div><p className="text-label-sm">TDEE</p><p style={{ fontFamily: '"JetBrains Mono", monospace', fontWeight: 500, fontSize: 16 }}>{goals.tdee} KCAL</p></div>
-          <div><p className="text-label-sm">TARGET</p><p style={{ fontFamily: '"JetBrains Mono", monospace', fontWeight: 500, fontSize: 16, color: goals.goalType === 'weight_loss' ? '#22C55E' : goals.goalType === 'maintenance' ? '#F0F0F0' : '#F59E0B' }}>{goals.cal} KCAL</p></div>
+      {/* Goal Banner - Premium Industrial Glow */}
+      <div style={{ 
+        background: 'linear-gradient(145deg, #111111 0%, #1A0005 100%)', 
+        border: '1px solid #3A0010', 
+        borderRadius: 8, 
+        padding: '1.5rem', 
+        marginBottom: '2rem', 
+        boxShadow: '0 8px 32px rgba(232, 0, 29, 0.15)',
+        display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '1.5rem',
+        position: 'relative', overflow: 'hidden'
+      }}>
+        {/* Subtle accent glow line at the top */}
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg, transparent, #E8001D, transparent)' }} />
+        
+        <div className="goal-banner" style={{ zIndex: 1 }}>
+          <div><p className="text-label-sm" style={{ color: '#888' }}>GOAL</p><p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 800, fontSize: 22, color: '#E8001D', whiteSpace: 'nowrap', textShadow: '0 0 10px rgba(232,0,29,0.3)' }}>{GOAL_LABELS[goals.goalType] || 'MAINTENANCE'}</p></div>
+          <div><p className="text-label-sm" style={{ color: '#888' }}>WEIGHT</p><p style={{ fontFamily: '"JetBrains Mono", monospace', fontWeight: 600, fontSize: 18, color: '#F0F0F0' }}>{goals.weight} KG</p></div>
+          <div><p className="text-label-sm" style={{ color: '#888' }}>TDEE</p><p style={{ fontFamily: '"JetBrains Mono", monospace', fontWeight: 600, fontSize: 18, color: '#F0F0F0' }}>{goals.tdee} KCAL</p></div>
+          <div><p className="text-label-sm" style={{ color: '#888' }}>TARGET</p><p style={{ fontFamily: '"JetBrains Mono", monospace', fontWeight: 600, fontSize: 18, color: goals.goalType === 'weight_loss' ? '#22C55E' : goals.goalType === 'maintenance' ? '#F0F0F0' : '#F59E0B' }}>{goals.cal} KCAL</p></div>
         </div>
-        <p style={{ fontSize: 11, color: '#444', width: '100%', textAlign: 'right' }} className="hide-mobile">{goals.goalType === 'weight_loss' ? '-500 DEFICIT' : goals.goalType === 'weight_gain' ? '+400 SURPLUS' : goals.goalType === 'lean_bulk' ? '+250 SURPLUS' : 'AT MAINTENANCE'}</p>
+        <div style={{ zIndex: 1, textAlign: 'right' }}>
+          <span style={{ 
+            display: 'inline-block', padding: '6px 12px', background: 'rgba(232,0,29,0.1)', 
+            border: '1px solid rgba(232,0,29,0.2)', borderRadius: 4,
+            fontSize: 11, fontWeight: 600, color: '#E8001D', textTransform: 'uppercase', letterSpacing: '0.05em'
+          }} className="hide-mobile">
+            {goals.goalType === 'weight_loss' ? '-500 DEFICIT' : goals.goalType === 'weight_gain' ? '+400 SURPLUS' : goals.goalType === 'lean_bulk' ? '+250 SURPLUS' : 'AT MAINTENANCE'}
+          </span>
+        </div>
       </div>
 
-      {/* Calorie + Macro Row */}
-      <div className="nutrition-grid">
-        <div className="card-stat" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', borderLeft: '3px solid #E8001D', padding: '2rem 1rem' }}>
-          <p className="text-label" style={{ marginBottom: 8, color: '#E8001D' }}>CALORIES</p>
-          <p className="text-hero-number" style={{ fontSize: 48, color: '#E8001D' }}>{Math.round(totals.cal)}</p>
-          <p style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 13, color: '#444', marginTop: 4 }}>/ {goals.cal} KCAL</p>
-          <div className="progress-track" style={{ width: '100%', maxWidth: 200, marginTop: 16 }}>
-            <div className="progress-fill" style={{ width: `${Math.min((totals.cal / goals.cal) * 100, 100)}%`, background: '#E8001D' }} />
+      {/* Calorie + Macro Row - Premium Dashboard Layout */}
+      <div className="nutrition-grid" style={{ marginBottom: '2rem' }}>
+        <div style={{ 
+          background: 'radial-gradient(circle at top right, rgba(232, 0, 29, 0.08), #111 70%)',
+          border: '1px solid #1E1E1E', borderRadius: 8, padding: '2.5rem 1.5rem',
+          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center',
+          boxShadow: '0 10px 40px rgba(0,0,0,0.5)', position: 'relative'
+        }}>
+          <p className="text-label" style={{ marginBottom: 12, color: '#E8001D', letterSpacing: '0.15em' }}>CALORIES IN</p>
+          <div style={{ position: 'relative', display: 'inline-block' }}>
+            <p className="text-hero-number" style={{ fontSize: 64, color: '#F0F0F0', textShadow: '0 0 20px rgba(255,255,255,0.1)' }}>{Math.round(totals.cal)}</p>
           </div>
-          <p style={{ fontSize: 12, color: '#666', marginTop: 8, fontFamily: '"JetBrains Mono", monospace' }}>{Math.max(0, Math.round(goals.cal - totals.cal))} REMAINING</p>
+          <p style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 14, color: '#666', marginTop: 4 }}>/ {goals.cal} KCAL</p>
+          <div className="progress-track" style={{ width: '100%', maxWidth: 220, marginTop: 24, height: 4, background: '#1A1A1A' }}>
+            <div className="progress-fill" style={{ width: `${Math.min((totals.cal / goals.cal) * 100, 100)}%`, background: 'linear-gradient(90deg, #7A0010, #E8001D)', boxShadow: '0 0 10px rgba(232,0,29,0.5)' }} />
+          </div>
+          <p style={{ fontSize: 13, color: '#888', marginTop: 12, fontFamily: '"JetBrains Mono", monospace' }}>
+            <span style={{ color: '#F0F0F0', fontWeight: 600 }}>{Math.max(0, Math.round(goals.cal - totals.cal))}</span> REMAINING
+          </p>
         </div>
-        <div className="card macro-grid">
+
+        <div style={{ 
+          background: '#111', border: '1px solid #1E1E1E', borderRadius: 8, 
+          display: 'flex', justifyContent: 'space-around', alignItems: 'center', padding: '2rem', gap: '1rem',
+          boxShadow: '0 10px 40px rgba(0,0,0,0.3)'
+        }} className="macro-grid">
           {macros.map(m => (
-            <div key={m.label} style={{ textAlign: 'center' }}>
-              <p className="text-label" style={{ marginBottom: 10, color: m.color }}>{m.label}</p>
-              <p style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 26, fontWeight: 500, color: m.color, lineHeight: 1 }}>{Math.round(m.val)}</p>
-              <p style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 11, color: '#555', marginTop: 4 }}>/ {m.goal}{m.unit}</p>
-              <div className="progress-track" style={{ marginTop: 12 }}>
-                <div style={{ height: '100%', borderRadius: 2, background: m.color, transition: 'width 300ms ease', width: `${Math.min((m.val / m.goal) * 100, 100)}%` }} />
+            <div key={m.label} style={{ textAlign: 'center', flex: 1 }}>
+              <p className="text-label" style={{ marginBottom: 12, color: m.color, letterSpacing: '0.1em' }}>{m.label}</p>
+              <p style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 32, fontWeight: 600, color: '#F0F0F0', lineHeight: 1, textShadow: `0 0 15px ${m.color}40` }}>{Math.round(m.val)}</p>
+              <p style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 12, color: '#666', marginTop: 6 }}>/ {m.goal}{m.unit}</p>
+              <div className="progress-track" style={{ marginTop: 16, height: 3, background: '#1A1A1A' }}>
+                <div style={{ height: '100%', borderRadius: 2, background: m.color, boxShadow: `0 0 8px ${m.color}80`, transition: 'width 500ms cubic-bezier(0.4, 0, 0.2, 1)', width: `${Math.min((m.val / m.goal) * 100, 100)}%` }} />
               </div>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Water */}
-      <div className="card" style={{ marginBottom: '1.5rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-          <h3 className="text-section" style={{ fontSize: 14 }}>WATER INTAKE</h3>
-          <span style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 13, color: '#888' }}>{waterGlasses} / 8</span>
+      {/* Water - Premium Glowing Tracker */}
+      <div style={{ 
+        background: '#111', border: '1px solid #1E1E1E', borderRadius: 8, padding: '1.5rem 2rem', marginBottom: '2rem',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.3)'
+      }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+          <h3 className="text-section" style={{ fontSize: 15, letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ color: '#38BDF8' }}>💧</span> WATER INTAKE
+          </h3>
+          <span style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 14, fontWeight: 600, color: '#38BDF8' }}>{waterGlasses} / 8</span>
         </div>
-        <div style={{ display: 'flex', gap: 6 }}>
+        <div style={{ display: 'flex', gap: 8 }}>
           {Array.from({ length: 8 }).map((_, i) => (
             <button key={i} type="button" onClick={() => setWaterGlasses(i < waterGlasses ? i : i + 1)}
-              style={{ flex: 1, height: 36, borderRadius: 2, border: 'none', cursor: 'pointer', transition: 'all 100ms ease', background: i < waterGlasses ? 'rgba(96,165,250,0.2)' : '#1A1A1A', borderBottom: i < waterGlasses ? '2px solid #60A5FA' : '2px solid transparent' }} />
+              style={{ 
+                flex: 1, height: 44, borderRadius: 4, cursor: 'pointer', transition: 'all 200ms ease',
+                background: i < waterGlasses ? 'linear-gradient(180deg, rgba(56,189,248,0.1) 0%, rgba(56,189,248,0.25) 100%)' : '#141414', 
+                border: '1px solid', borderColor: i < waterGlasses ? 'rgba(56,189,248,0.5)' : '#1E1E1E',
+                boxShadow: i < waterGlasses ? '0 4px 12px rgba(56,189,248,0.2)' : 'inset 0 2px 4px rgba(0,0,0,0.5)'
+              }} 
+            />
           ))}
         </div>
       </div>
 
-      {/* Meal Sections */}
-      {MEALS.map(meal => {
-        const items = logged.filter(e => e.meal === meal)
-        const cals = items.reduce((s, e) => s + scale(e.food, 'cal', e.qty), 0)
-        const open = expandedMeal === meal
-        return (
-          <div key={meal} style={{ background: '#111', border: '1px solid #1E1E1E', borderRadius: 4, marginBottom: '0.5rem', overflow: 'hidden' }}>
-            <button type="button" onClick={() => setExpandedMeal(open ? null : meal)}
-              style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.875rem 1.25rem', background: 'transparent', border: 'none', cursor: 'pointer', color: '#F0F0F0' }}
-              onMouseOver={e => e.currentTarget.style.background = '#1A1A1A'} onMouseOut={e => e.currentTarget.style.background = 'transparent'}>
-              <span style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: 15 }}>{meal}</span>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <span style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 13, color: '#888' }}>{Math.round(cals)} KCAL</span>
-                {open ? <ChevronUp size={16} style={{ color: '#444' }} /> : <ChevronDown size={16} style={{ color: '#444' }} />}
-              </div>
-            </button>
+      {/* Meal Sections - Premium Glass Accordions */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+        {MEALS.map(meal => {
+          const items = logged.filter(e => e.meal === meal)
+          const cals = items.reduce((s, e) => s + scale(e.food, 'cal', e.qty), 0)
+          const open = expandedMeal === meal
+          return (
+            <div key={meal} style={{ 
+              background: open ? '#131313' : '#111', 
+              border: open ? '1px solid #333' : '1px solid #1E1E1E', 
+              borderRadius: 6, overflow: 'hidden', transition: 'all 200ms ease',
+              boxShadow: open ? '0 8px 24px rgba(0,0,0,0.4)' : 'none'
+            }}>
+              <button type="button" onClick={() => setExpandedMeal(open ? null : meal)}
+                style={{ 
+                  width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', 
+                  padding: '1rem 1.5rem', background: 'transparent', border: 'none', cursor: 'pointer', color: '#F0F0F0',
+                  transition: 'background 150ms ease'
+                }}
+                onMouseOver={e => e.currentTarget.style.background = 'rgba(255,255,255,0.02)'} 
+                onMouseOut={e => e.currentTarget.style.background = 'transparent'}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <span style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 800, fontSize: 18, letterSpacing: '0.02em', color: open ? '#E8001D' : '#F0F0F0', transition: 'color 150ms ease' }}>{meal}</span>
+                  {items.length > 0 && <span style={{ background: '#E8001D', color: '#fff', fontSize: 10, fontWeight: 700, padding: '2px 6px', borderRadius: 12 }}>{items.length}</span>}
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                  <span style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 14, fontWeight: 600, color: items.length > 0 ? '#F0F0F0' : '#555' }}>{Math.round(cals)} KCAL</span>
+                  <div style={{ width: 24, height: 24, borderRadius: '50%', background: open ? '#1A0005' : '#1A1A1A', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 150ms ease', color: open ? '#E8001D' : '#888' }}>
+                    {open ? <ChevronUp size={14} strokeWidth={3} /> : <ChevronDown size={14} strokeWidth={3} />}
+                  </div>
+                </div>
+              </button>
             {open && items.length > 0 && <div style={{ borderTop: '1px solid #1E1E1E' }}>
               {items.map((entry, idx) => {
                 const gi = logged.indexOf(entry)
@@ -285,10 +346,11 @@ export default function MemberNutrition() {
                 )
               })}
             </div>}
-            {open && items.length === 0 && <div style={{ padding: '1.5rem', textAlign: 'center', color: '#333', borderTop: '1px solid #1E1E1E', fontSize: 13 }}>Nothing logged for {meal.toLowerCase()}.</div>}
+            {open && items.length === 0 && <div style={{ padding: '2rem 1.5rem', textAlign: 'center', color: '#555', borderTop: '1px solid #1A1A1A', fontSize: 13, background: 'rgba(0,0,0,0.2)' }}>Nothing logged for {meal.toLowerCase()} yet. <br/><span style={{ color: '#888', marginTop: 8, display: 'inline-block' }}>Click 'LOG FOOD' to add items.</span></div>}
           </div>
         )
       })}
+      </div>
 
       {/* Goal Setup Modal */}
       {showSetup && (
