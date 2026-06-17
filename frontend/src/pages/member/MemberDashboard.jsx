@@ -84,8 +84,8 @@ export default function MemberDashboard() {
   return (
     <div style={{ maxWidth: 1200, margin: '0 auto' }}>
 
-      {/* Hero Greeting */}
-      <div style={{ marginTop: '2.5rem', marginBottom: '2rem', position: 'relative' }}>
+      {/* Hero Greeting - Premium Glow Typography */}
+      <div style={{ marginTop: '2.5rem', marginBottom: '2.5rem', position: 'relative' }}>
         <p style={{
           fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 800,
           fontSize: 'clamp(36px, 6vw, 64px)',
@@ -96,107 +96,125 @@ export default function MemberDashboard() {
         <p style={{
           fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 800,
           fontSize: 'clamp(36px, 6vw, 64px)',
-          textTransform: 'uppercase', letterSpacing: '0.03em', lineHeight: 1, color: '#E8001D',
+          textTransform: 'uppercase', letterSpacing: '0.03em', lineHeight: 1, 
+          color: '#E8001D', textShadow: '0 0 20px rgba(232,0,29,0.4)',
           marginTop: 4,
+          background: '-webkit-linear-gradient(0deg, #E8001D, #FF4B4B)',
+          WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent'
         }}>
           {user?.username?.toUpperCase()}
         </p>
-        <p style={{ color: '#444', fontSize: 13, marginTop: 12, fontFamily: '"Inter", sans-serif' }}>
+        <p style={{ color: '#888', fontSize: 14, marginTop: 16, fontFamily: '"Inter", sans-serif', letterSpacing: '0.01em' }}>
           Your fitness overview for today.
         </p>
       </div>
 
-      {/* Membership Card - styled like a physical gym card */}
+      {/* Membership Card - Premium Glassmorphic ID */}
       <div style={{
-        background: '#111', border: '1px solid #1E1E1E', borderRadius: 4,
-        padding: '1.5rem 2rem', marginBottom: '2rem', position: 'relative', overflow: 'hidden',
+        background: 'linear-gradient(145deg, #111111 0%, #1A0005 100%)', 
+        border: '1px solid #3A0010', borderRadius: 8,
+        padding: '2rem 2.5rem', marginBottom: '2.5rem', position: 'relative', overflow: 'hidden',
+        boxShadow: '0 8px 32px rgba(232, 0, 29, 0.15)',
       }}>
-        {/* Red accent line */}
-        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: '#E8001D' }} />
+        {/* Glowing red accent line */}
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: 'linear-gradient(90deg, transparent, #E8001D, transparent)', boxShadow: '0 0 10px #E8001D' }} />
 
         {loading ? (
           <p style={{ color: '#444', fontSize: 13 }}>Loading membership...</p>
         ) : membership ? (
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1.5rem', alignItems: 'center' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '2rem' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2.5rem', alignItems: 'center' }}>
               <div>
-                <p className="text-label-sm" style={{ marginBottom: 4 }}>MEMBER</p>
-                <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: 20, textTransform: 'uppercase' }}>
+                <p className="text-label-sm" style={{ marginBottom: 8, color: '#888', letterSpacing: '0.1em' }}>MEMBER</p>
+                <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 800, fontSize: 24, textTransform: 'uppercase', color: '#F0F0F0' }}>
                   {user?.username?.toUpperCase()}
                 </p>
               </div>
               <div>
-                <p className="text-label-sm" style={{ marginBottom: 4 }}>PLAN</p>
-                <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: 20, textTransform: 'uppercase' }}>
+                <p className="text-label-sm" style={{ marginBottom: 8, color: '#888', letterSpacing: '0.1em' }}>PLAN</p>
+                <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 800, fontSize: 24, textTransform: 'uppercase', color: '#E8001D', textShadow: '0 0 10px rgba(232,0,29,0.3)' }}>
                   {membership.plan_name}
                 </p>
               </div>
               <div>
-                <p className="text-label-sm" style={{ marginBottom: 4 }}>EXPIRES</p>
-                <p style={{ fontFamily: '"JetBrains Mono", monospace', fontWeight: 500, fontSize: 16, color: '#F0F0F0' }}>
+                <p className="text-label-sm" style={{ marginBottom: 8, color: '#888', letterSpacing: '0.1em' }}>EXPIRES</p>
+                <p style={{ fontFamily: '"JetBrains Mono", monospace', fontWeight: 500, fontSize: 18, color: '#F0F0F0' }}>
                   {membership.end_date}
                 </p>
               </div>
               <div>
-                <p className="text-label-sm" style={{ marginBottom: 4 }}>DAYS LEFT</p>
-                <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 800, fontSize: 28, color: daysLeft < 10 ? '#E8001D' : '#22C55E' }}>
+                <p className="text-label-sm" style={{ marginBottom: 8, color: '#888', letterSpacing: '0.1em' }}>DAYS LEFT</p>
+                <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 800, fontSize: 32, color: daysLeft < 10 ? '#E8001D' : '#22C55E', textShadow: `0 0 15px ${daysLeft < 10 ? 'rgba(232,0,29,0.4)' : 'rgba(34,197,94,0.4)'}` }}>
                   {daysLeft}
                 </p>
               </div>
             </div>
-            <div style={{ width: 120 }}>
-              <div className="progress-track" style={{ height: 3 }}>
+            <div style={{ width: 140 }}>
+              <div className="progress-track" style={{ height: 4, background: '#1A1A1A' }}>
                 <div 
                   className={`progress-fill ${pctLeft > 50 ? 'progress-fill-success' : pctLeft > 20 ? 'progress-fill-warning' : ''}`} 
-                  style={{ width: `${pctLeft}%` }} 
+                  style={{ 
+                    width: `${pctLeft}%`, 
+                    background: pctLeft > 50 ? 'linear-gradient(90deg, #166534, #22C55E)' : pctLeft > 20 ? 'linear-gradient(90deg, #92400E, #F59E0B)' : 'linear-gradient(90deg, #7A0010, #E8001D)',
+                    boxShadow: `0 0 10px ${pctLeft > 50 ? 'rgba(34,197,94,0.5)' : pctLeft > 20 ? 'rgba(245,158,11,0.5)' : 'rgba(232,0,29,0.5)'}`
+                  }} 
                 />
               </div>
-              <p style={{ fontSize: 11, color: '#444', marginTop: 4, textAlign: 'right', fontFamily: '"JetBrains Mono", monospace' }}>
+              <p style={{ fontSize: 12, color: '#888', marginTop: 8, textAlign: 'right', fontFamily: '"JetBrains Mono", monospace' }}>
                 {pctLeft}% LEFT
               </p>
             </div>
           </div>
         ) : (
-          <p style={{ color: '#444', fontSize: 14 }}>No active membership. Contact the gym.</p>
+          <p style={{ color: '#666', fontSize: 14, fontFamily: '"JetBrains Mono", monospace' }}>NO ACTIVE MEMBERSHIP FOUND</p>
         )}
       </div>
 
-      <div className="grid-2col">
-        {/* Today's Workout */}
-        <div className="card">
-          <p className="text-label" style={{ marginBottom: 12 }}>TODAY'S WORKOUT</p>
+      <div className="grid-2col" style={{ gap: '2rem' }}>
+        {/* Today's Workout - Premium Card */}
+        <div style={{ 
+          background: todayWorkout?.status === 'ok' ? 'radial-gradient(circle at bottom right, rgba(232, 0, 29, 0.08), #111 60%)' : '#111', 
+          border: '1px solid #1E1E1E', borderRadius: 8, padding: '2rem',
+          boxShadow: '0 8px 24px rgba(0,0,0,0.3)', position: 'relative', overflow: 'hidden'
+        }}>
+          {todayWorkout?.status === 'ok' && <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: '4px', background: '#E8001D', boxShadow: '0 0 15px #E8001D' }} />}
+          
+          <p className="text-label" style={{ marginBottom: 16, color: '#888', letterSpacing: '0.1em' }}>TODAY'S WORKOUT</p>
           {todayWorkout?.status === 'ok' ? (
             <>
-              <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 800, fontSize: 32, textTransform: 'uppercase', color: '#F0F0F0', marginBottom: 4 }}>
+              <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 800, fontSize: 40, textTransform: 'uppercase', color: '#F0F0F0', marginBottom: 8, lineHeight: 1.1, textShadow: '0 0 20px rgba(255,255,255,0.1)' }}>
                 {todayWorkout.day_label}
               </p>
-              <p style={{ color: '#888', fontSize: 13, marginBottom: 16 }}>
-                {todayWorkout.program_name} {todayWorkout.focus && `• ${todayWorkout.focus}`}
+              <p style={{ color: '#E8001D', fontSize: 14, marginBottom: 24, fontFamily: '"JetBrains Mono", monospace', fontWeight: 600 }}>
+                {todayWorkout.program_name?.toUpperCase()} {todayWorkout.focus && <span style={{ color: '#666' }}>• {todayWorkout.focus?.toUpperCase()}</span>}
               </p>
-              <button className="btn-primary" onClick={() => navigate('/app/workouts/today')} style={{ padding: '10px 24px' }}>VIEW WORKOUT</button>
+              <button className="btn-primary" onClick={() => navigate('/app/workouts/today')} style={{ padding: '12px 28px', fontSize: 13, letterSpacing: '0.05em' }}>VIEW WORKOUT</button>
             </>
           ) : (
             <>
-              <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 800, fontSize: 32, textTransform: 'uppercase', color: '#F0F0F0', marginBottom: 16 }}>
+              <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 800, fontSize: 40, textTransform: 'uppercase', color: '#555', marginBottom: 24, lineHeight: 1.1 }}>
                 REST DAY
               </p>
-              <button className="btn-primary" onClick={() => navigate('/app/workouts/programs')} style={{ padding: '10px 24px' }}>FIND A PROGRAM</button>
+              <button className="btn-primary" onClick={() => navigate('/app/workouts/programs')} style={{ padding: '12px 28px', fontSize: 13, letterSpacing: '0.05em' }}>FIND A PROGRAM</button>
             </>
           )}
         </div>
 
-        {/* Body Metrics */}
-        <div className="card">
-          <p className="text-label" style={{ marginBottom: 16 }}>BODY METRICS</p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        {/* Body Metrics - Sleek Dashboard List */}
+        <div style={{ 
+          background: '#111', border: '1px solid #1E1E1E', borderRadius: 8, padding: '2rem',
+          boxShadow: '0 8px 24px rgba(0,0,0,0.3)'
+        }}>
+          <p className="text-label" style={{ marginBottom: 20, color: '#888', letterSpacing: '0.1em' }}>BODY METRICS</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
             {BODY_METRICS.map((m, i) => (
-              <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ color: '#888', fontSize: 13 }}>{m.label}</span>
+              <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '1.25rem', borderBottom: i < BODY_METRICS.length - 1 ? '1px solid #1A1A1A' : 'none' }}>
+                <span style={{ color: '#F0F0F0', fontSize: 14, fontWeight: 500 }}>{m.label}</span>
                 <div style={{ textAlign: 'right' }}>
-                  <span style={{ fontFamily: '"JetBrains Mono", monospace', fontWeight: 500, fontSize: 15 }}>{m.value}</span>
+                  <span style={{ fontFamily: '"JetBrains Mono", monospace', fontWeight: 600, fontSize: 16, color: '#F0F0F0' }}>{m.value}</span>
                   <span style={{
-                    marginLeft: 8, fontSize: 12, fontWeight: 600, fontFamily: '"JetBrains Mono", monospace',
-                    color: m.positive ? '#22C55E' : '#E8001D',
+                    marginLeft: 12, fontSize: 13, fontWeight: 600, fontFamily: '"JetBrains Mono", monospace',
+                    color: m.positive ? '#22C55E' : '#E8001D', textShadow: `0 0 10px ${m.positive ? 'rgba(34,197,94,0.3)' : 'rgba(232,0,29,0.3)'}`
                   }}>{m.change}</span>
                 </div>
               </div>
@@ -205,46 +223,57 @@ export default function MemberDashboard() {
         </div>
       </div>
 
-      <div className="grid-2col" style={{ marginTop: '1.5rem' }}>
-        {/* Today's Calories */}
-        <div className="card">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-            <h3 className="text-section" style={{ fontSize: 14 }}>TODAY'S CALORIES</h3>
-            <button className="btn-secondary" onClick={() => navigate('/app/nutrition')} style={{ fontSize: 12, minHeight: '32px', padding: '4px 12px' }}>LOG FOOD</button>
+      <div className="grid-2col" style={{ marginTop: '2rem', gap: '2rem' }}>
+        {/* Today's Calories - Premium Glow */}
+        <div style={{ 
+          background: 'radial-gradient(circle at top right, rgba(34, 197, 94, 0.08), #111 70%)',
+          border: '1px solid #1E1E1E', borderRadius: 8, padding: '2rem',
+          boxShadow: '0 8px 24px rgba(0,0,0,0.3)', position: 'relative'
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+            <h3 className="text-section" style={{ fontSize: 14, color: '#888', letterSpacing: '0.1em' }}>TODAY'S CALORIES</h3>
+            <button className="btn-secondary" onClick={() => navigate('/app/nutrition')} style={{ fontSize: 12, minHeight: '32px', padding: '6px 16px', borderColor: '#E8001D', color: '#E8001D' }}>LOG FOOD</button>
           </div>
           <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 12 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 16 }}>
               <div>
-                <p className="text-label" style={{ marginBottom: 8 }}>CONSUMED</p>
+                <p className="text-label" style={{ marginBottom: 8, color: '#E8001D' }}>CONSUMED</p>
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
-                  <p className="text-hero-number" style={{ fontSize: 42, color: '#F0F0F0', lineHeight: 1 }}>{calConsumed}</p>
-                  <p style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 12, color: '#444' }}>/ {goals.cal} KCAL</p>
+                  <p className="text-hero-number" style={{ fontSize: 48, color: '#E8001D', lineHeight: 1, textShadow: '0 0 20px rgba(232,0,29,0.2)' }}>{calConsumed}</p>
+                  <p style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 14, color: '#666' }}>/ {goals.cal} KCAL</p>
                 </div>
               </div>
               <div style={{ textAlign: 'right' }}>
-                <p style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 16, color: '#E8001D', fontWeight: 500 }}>
+                <p style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 20, color: '#F0F0F0', fontWeight: 600 }}>
                   {calRemaining}
                 </p>
-                <p className="text-label" style={{ fontSize: 10 }}>REMAINING</p>
+                <p className="text-label" style={{ fontSize: 11, color: '#888' }}>REMAINING</p>
               </div>
             </div>
-            <div className="progress-track" style={{ height: 6 }}>
-              <div className="progress-fill" style={{ width: `${pctCalories}%`, background: '#E8001D' }} />
+            <div className="progress-track" style={{ height: 6, background: '#1A1A1A', borderRadius: 3 }}>
+              <div className="progress-fill" style={{ width: `${pctCalories}%`, background: 'linear-gradient(90deg, #7A0010, #E8001D)', boxShadow: '0 0 10px rgba(232,0,29,0.5)', borderRadius: 3 }} />
             </div>
           </div>
         </div>
 
-        {/* Announcements */}
-        <div className="card" style={{ padding: 0 }}>
-          <div style={{ padding: '1rem 1.5rem', borderBottom: '1px solid #1E1E1E' }}>
-            <h3 className="text-section" style={{ fontSize: 14 }}>ANNOUNCEMENTS</h3>
+        {/* Announcements - Glass Notifications */}
+        <div style={{ 
+          background: '#111', border: '1px solid #1E1E1E', borderRadius: 8, padding: 0,
+          boxShadow: '0 8px 24px rgba(0,0,0,0.3)', overflow: 'hidden'
+        }}>
+          <div style={{ padding: '1.5rem 2rem', borderBottom: '1px solid #1A1A1A', background: 'rgba(255,255,255,0.02)' }}>
+            <h3 className="text-section" style={{ fontSize: 14, color: '#888', letterSpacing: '0.1em' }}>ANNOUNCEMENTS</h3>
           </div>
           {announcements.length > 0 ? (
-            <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              {announcements.map(a => (
-                <div key={a.id} style={{ borderLeft: '2px solid #E8001D', paddingLeft: 12 }}>
-                  <p style={{ fontWeight: 600, fontSize: 14, color: '#F0F0F0' }}>{a.title}</p>
-                  <p style={{ color: '#888', fontSize: 12, marginTop: 4, lineHeight: 1.5 }}>
+            <div style={{ padding: '1.5rem 2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+              {announcements.map((a, idx) => (
+                <div key={a.id} style={{ 
+                  borderLeft: '3px solid #E8001D', paddingLeft: 16, 
+                  paddingBottom: idx < announcements.length - 1 ? '1.5rem' : 0,
+                  borderBottom: idx < announcements.length - 1 ? '1px solid #1A1A1A' : 'none'
+                }}>
+                  <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: 18, color: '#F0F0F0', letterSpacing: '0.02em' }}>{a.title}</p>
+                  <p style={{ color: '#888', fontSize: 13, marginTop: 6, lineHeight: 1.6 }}>
                     {a.body}
                   </p>
                 </div>
