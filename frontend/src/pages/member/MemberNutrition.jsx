@@ -268,17 +268,17 @@ export default function MemberNutrition() {
               {items.map((entry, idx) => {
                 const gi = logged.indexOf(entry)
                 return (
-                  <div key={idx} style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.25rem', borderBottom: '1px solid #141414', gap: '0.5rem' }}
+                  <div key={idx} style={{ display: 'flex', flexWrap: 'nowrap', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.25rem', borderBottom: '1px solid #141414', gap: '0.5rem' }}
                     onMouseOver={e => e.currentTarget.style.background = '#1A1A1A'} onMouseOut={e => e.currentTarget.style.background = 'transparent'}>
-                    <div style={{ flex: '1 1 auto', minWidth: 200 }}>
-                      <p style={{ fontSize: 14, fontWeight: 500, lineHeight: 1.2 }}>{entry.food.name}</p>
-                      <p style={{ fontSize: 12, color: '#666', fontFamily: '"JetBrains Mono", monospace', marginTop: 4 }}>
+                    <div style={{ flex: '1 1 auto', minWidth: 0 }}>
+                      <p style={{ fontSize: 14, fontWeight: 500, lineHeight: 1.2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{entry.food.name}</p>
+                      <p style={{ fontSize: 12, color: '#666', fontFamily: '"JetBrains Mono", monospace', marginTop: 4, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                         {entry.qty}{DIRECT_ITEMS.includes(entry.food.name) ? ' SRV' : 'G'} | P:{Math.round(scale(entry.food, 'protein', entry.qty))} C:{Math.round(scale(entry.food, 'carbs', entry.qty))} F:{Math.round(scale(entry.food, 'fat', entry.qty))}
                       </p>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: '0 0 auto' }}>
-                      <span style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 15, fontWeight: 600, color: '#E8001D' }}>{Math.round(scale(entry.food, 'cal', entry.qty))} KCAL</span>
-                      <button type="button" onClick={() => handleRemove(gi)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#555', fontSize: 18, padding: '0 4px' }}
+                      <span style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 15, fontWeight: 600, color: '#E8001D', whiteSpace: 'nowrap' }}>{Math.round(scale(entry.food, 'cal', entry.qty))} KCAL</span>
+                      <button type="button" onClick={() => handleRemove(gi)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#555', fontSize: 18, padding: '0 4px', flexShrink: 0 }}
                         onMouseOver={e => e.currentTarget.style.color = '#E8001D'} onMouseOut={e => e.currentTarget.style.color = '#555'}>×</button>
                     </div>
                   </div>
