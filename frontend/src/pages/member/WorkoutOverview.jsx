@@ -85,9 +85,8 @@ export default function WorkoutOverview() {
               )}
             </div>
 
-            <div style={{ padding: '0.875rem 1.5rem' }}>
-              <Link to="/app/workouts/today"
-                style={{ fontFamily: '"Inter", sans-serif', fontSize: 13, fontWeight: 600, color: '#E8001D', textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+            <div style={{ padding: '0.875rem 1.5rem', paddingBottom: '1.25rem' }}>
+              <Link to="/app/workouts/today" className="btn-secondary" style={{ textDecoration: 'none' }}>
                 VIEW FULL SESSION
               </Link>
             </div>
@@ -99,8 +98,7 @@ export default function WorkoutOverview() {
       <div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
           <h2 className="text-section" style={{ fontSize: 14 }}>ACTIVE PROGRAM</h2>
-          <Link to="/app/workouts/programs"
-            style={{ fontSize: 12, color: '#888', textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 500 }}>
+          <Link to="/app/workouts/programs" className="btn-secondary" style={{ textDecoration: 'none', fontSize: '12px', minHeight: '32px', padding: '6px 12px' }}>
             CHANGE PROGRAM
           </Link>
         </div>
@@ -151,9 +149,8 @@ export default function WorkoutOverview() {
               })}
             </div>
 
-            <div style={{ marginTop: '1rem' }}>
-              <Link to={`/app/workouts/programs/${activeProgram.id}`}
-                style={{ fontSize: 12, color: '#888', textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 500 }}>
+            <div style={{ marginTop: '1.25rem' }}>
+              <Link to={`/app/workouts/programs/${activeProgram.id}`} className="btn-secondary" style={{ textDecoration: 'none', fontSize: '13px', width: '100%', justifyContent: 'center' }}>
                 VIEW FULL PROGRAM
               </Link>
             </div>

@@ -210,7 +210,7 @@ export default function MemberDashboard() {
         <div className="card">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
             <h3 className="text-section" style={{ fontSize: 14 }}>TODAY'S CALORIES</h3>
-            <button className="btn-ghost" onClick={() => navigate('/app/nutrition')} style={{ fontSize: 11, padding: '4px 8px' }}>LOG FOOD</button>
+            <button className="btn-secondary" onClick={() => navigate('/app/nutrition')} style={{ fontSize: 12, minHeight: '32px', padding: '4px 12px' }}>LOG FOOD</button>
           </div>
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 12 }}>
