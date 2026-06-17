@@ -146,7 +146,10 @@ export default function MemberDashboard() {
             </div>
             <div style={{ width: 120 }}>
               <div className="progress-track" style={{ height: 3 }}>
-                <div className={`progress-fill${pctLeft > 50 ? '' : pctLeft > 20 ? '-warning' : ''}`} style={{ width: `${pctLeft}%` }} />
+                <div 
+                  className={`progress-fill ${pctLeft > 50 ? 'progress-fill-success' : pctLeft > 20 ? 'progress-fill-warning' : ''}`} 
+                  style={{ width: `${pctLeft}%` }} 
+                />
               </div>
               <p style={{ fontSize: 11, color: '#444', marginTop: 4, textAlign: 'right', fontFamily: '"JetBrains Mono", monospace' }}>
                 {pctLeft}% LEFT
