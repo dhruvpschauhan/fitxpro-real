@@ -179,8 +179,8 @@ export default function MemberNutrition() {
 
   const macros = [
     { label: 'PROTEIN', val: totals.protein, goal: goals.protein, unit: 'G', color: '#E8001D' },
-    { label: 'CARBS', val: totals.carbs, goal: goals.carbs, unit: 'G', color: '#F59E0B' },
-    { label: 'FAT', val: totals.fat, goal: goals.fat, unit: 'G', color: '#3B82F6' },
+    { label: 'CARBS', val: totals.carbs, goal: goals.carbs, unit: 'G', color: '#E8001D' },
+    { label: 'FAT', val: totals.fat, goal: goals.fat, unit: 'G', color: '#E8001D' },
   ]
 
   if (loading) return <div style={{ padding: '2rem', color: '#444' }}>Loading...</div>
@@ -193,7 +193,7 @@ export default function MemberNutrition() {
           <p style={{ color: '#444', fontSize: 13, marginTop: 4 }}>Calorie targets based on your body metrics and goal</p>
         </div>
         <div style={{ display: 'flex', gap: 8, width: '100%', justifyContent: 'flex-start' }} className="header-actions">
-          <button onClick={() => setShowSetup(true)} className="btn-secondary" style={{ flex: 1, justifyContent: 'center', borderColor: '#3B82F6', color: '#3B82F6' }}><Settings size={14} /> GOAL</button>
+          <button onClick={() => setShowSetup(true)} className="btn-secondary" style={{ flex: 1, justifyContent: 'center', borderColor: '#22C55E', color: '#22C55E' }}><Settings size={14} /> GOAL</button>
           <button onClick={() => setShowPanel(true)} className="btn-primary" style={{ flex: 1, justifyContent: 'center' }}><Plus size={16} strokeWidth={2.5} /> LOG FOOD</button>
         </div>
       </div>
@@ -211,12 +211,12 @@ export default function MemberNutrition() {
 
       {/* Calorie + Macro Row */}
       <div className="nutrition-grid">
-        <div className="card-stat" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', borderLeft: '3px solid #22C55E', padding: '2rem 1rem' }}>
-          <p className="text-label" style={{ marginBottom: 8, color: '#22C55E' }}>CALORIES</p>
-          <p className="text-hero-number" style={{ fontSize: 48, color: '#22C55E' }}>{Math.round(totals.cal)}</p>
+        <div className="card-stat" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', borderLeft: '3px solid #E8001D', padding: '2rem 1rem' }}>
+          <p className="text-label" style={{ marginBottom: 8, color: '#E8001D' }}>CALORIES</p>
+          <p className="text-hero-number" style={{ fontSize: 48, color: '#E8001D' }}>{Math.round(totals.cal)}</p>
           <p style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 13, color: '#444', marginTop: 4 }}>/ {goals.cal} KCAL</p>
           <div className="progress-track" style={{ width: '100%', maxWidth: 200, marginTop: 16 }}>
-            <div className="progress-fill" style={{ width: `${Math.min((totals.cal / goals.cal) * 100, 100)}%`, background: '#22C55E' }} />
+            <div className="progress-fill" style={{ width: `${Math.min((totals.cal / goals.cal) * 100, 100)}%`, background: '#E8001D' }} />
           </div>
           <p style={{ fontSize: 12, color: '#666', marginTop: 8, fontFamily: '"JetBrains Mono", monospace' }}>{Math.max(0, Math.round(goals.cal - totals.cal))} REMAINING</p>
         </div>
