@@ -109,67 +109,6 @@ export default function MemberDashboard() {
         </p>
       </div>
 
-      {/* Membership Card - Premium Glassmorphic ID */}
-      <div style={{
-        background: 'linear-gradient(145deg, #111111 0%, #1A0005 100%)', 
-        border: '1px solid #3A0010', borderRadius: 8,
-        padding: '2rem 2.5rem', marginBottom: '2.5rem', position: 'relative', overflow: 'hidden',
-        boxShadow: '0 8px 32px rgba(232, 0, 29, 0.15)',
-      }}>
-        {/* Glowing red accent line */}
-        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: 'linear-gradient(90deg, transparent, #E8001D, transparent)', boxShadow: '0 0 10px #E8001D' }} />
-
-        {loading ? (
-          <p style={{ color: '#444', fontSize: 13 }}>Loading membership...</p>
-        ) : membership ? (
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '2rem' }}>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2.5rem', alignItems: 'center' }}>
-              <div>
-                <p className="text-label-sm" style={{ marginBottom: 8, color: '#888', letterSpacing: '0.1em' }}>MEMBER</p>
-                <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 800, fontSize: 24, textTransform: 'uppercase', color: '#F0F0F0' }}>
-                  {user?.username?.toUpperCase()}
-                </p>
-              </div>
-              <div>
-                <p className="text-label-sm" style={{ marginBottom: 8, color: '#888', letterSpacing: '0.1em' }}>PLAN</p>
-                <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 800, fontSize: 24, textTransform: 'uppercase', color: '#E8001D', textShadow: '0 0 10px rgba(232,0,29,0.3)' }}>
-                  {membership.plan_name}
-                </p>
-              </div>
-              <div>
-                <p className="text-label-sm" style={{ marginBottom: 8, color: '#888', letterSpacing: '0.1em' }}>EXPIRES</p>
-                <p style={{ fontFamily: '"JetBrains Mono", monospace', fontWeight: 500, fontSize: 18, color: '#F0F0F0' }}>
-                  {membership.end_date}
-                </p>
-              </div>
-              <div>
-                <p className="text-label-sm" style={{ marginBottom: 8, color: '#888', letterSpacing: '0.1em' }}>DAYS LEFT</p>
-                <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 800, fontSize: 32, color: daysLeft < 10 ? '#E8001D' : '#22C55E', textShadow: `0 0 15px ${daysLeft < 10 ? 'rgba(232,0,29,0.4)' : 'rgba(34,197,94,0.4)'}` }}>
-                  {daysLeft}
-                </p>
-              </div>
-            </div>
-            <div style={{ width: 140 }}>
-              <div className="progress-track" style={{ height: 4, background: '#1A1A1A' }}>
-                <div 
-                  className={`progress-fill ${pctLeft > 50 ? 'progress-fill-success' : pctLeft > 20 ? 'progress-fill-warning' : ''}`} 
-                  style={{ 
-                    width: `${pctLeft}%`, 
-                    background: pctLeft > 50 ? 'linear-gradient(90deg, #166534, #22C55E)' : pctLeft > 20 ? 'linear-gradient(90deg, #92400E, #F59E0B)' : 'linear-gradient(90deg, #7A0010, #E8001D)',
-                    boxShadow: `0 0 10px ${pctLeft > 50 ? 'rgba(34,197,94,0.5)' : pctLeft > 20 ? 'rgba(245,158,11,0.5)' : 'rgba(232,0,29,0.5)'}`
-                  }} 
-                />
-              </div>
-              <p style={{ fontSize: 12, color: '#888', marginTop: 8, textAlign: 'right', fontFamily: '"JetBrains Mono", monospace' }}>
-                {pctLeft}% LEFT
-              </p>
-            </div>
-          </div>
-        ) : (
-          <p style={{ color: '#666', fontSize: 14, fontFamily: '"JetBrains Mono", monospace' }}>NO ACTIVE MEMBERSHIP FOUND</p>
-        )}
-      </div>
-
       <div className="grid-2col" style={{ gap: '2rem' }}>
         {/* Today's Workout - Premium Card */}
         <div style={{ 
