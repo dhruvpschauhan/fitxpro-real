@@ -36,7 +36,8 @@ def send_email(to_email: str, subject: str, html_body: str) -> dict:
 
     try:
         context = ssl.create_default_context()
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
+        with smtplib.SMTP("smtp.gmail.com", 587) as server:
+            server.starttls(context=context)
             server.login(gmail_user, gmail_password)
             server.sendmail(gmail_user, to_email, msg.as_string())
         return {"success": True}
