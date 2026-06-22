@@ -9,6 +9,7 @@ export default function AdminAlertsPage() {
   const [loading,    setLoading]    = useState(true)
   const [sendingAll, setSendingAll] = useState(false)
   const [sendingIds, setSendingIds] = useState({})
+  const [renewingIds, setRenewingIds] = useState({})
   const [showLogs,   setShowLogs]   = useState(false)
   const [logs,       setLogs]       = useState([])
   const [logsLoading, setLogsLoading] = useState(false)
@@ -56,6 +57,22 @@ export default function AdminAlertsPage() {
       setSendingIds(prev => ({ ...prev, [userId]: 'failed' }))
       showToast('Failed to send alert.', 'error')
       setTimeout(() => setSendingIds(prev => ({ ...prev, [userId]: null })), 3000)
+    }
+  }
+
+  const handleRenew = async (userId) => {
+    if (!window.confirm("Mark this member as renewed? This will add 30 days to their current plan.")) return
+    setRenewingIds(prev => ({ ...prev, [userId]: true }))
+    try {
+      await client.post(`/admin/alerts/renew/${userId}`)
+      showToast('Membership renewed successfully!')
+      // Remove them from the list
+      setMembers(prev => prev.filter(m => m.user_id !== userId))
+    } catch (e) {
+      console.error(e)
+      showToast('Failed to renew membership.', 'error')
+    } finally {
+      setRenewingIds(prev => ({ ...prev, [userId]: false }))
     }
   }
 
@@ -246,21 +263,37 @@ export default function AdminAlertsPage() {
                         )}
                       </td>
                       <td style={{ textAlign: 'right' }}>
-                        {state === 'sending' ? (
-                          <span style={{ color: '#888', fontSize: 12, fontFamily: '"JetBrains Mono", monospace' }}>SENDING...</span>
-                        ) : state === 'sent' ? (
-                          <span style={{ color: '#22C55E', display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12 }}><CheckCircle2 size={14} /> SENT</span>
-                        ) : state === 'failed' ? (
-                          <span style={{ color: '#E8001D', display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12 }}><AlertCircle size={14} /> FAILED</span>
-                        ) : (
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 8 }}>
                           <button
-                            onClick={() => handleSendSingle(m.user_id)}
-                            className="btn-secondary"
-                            style={{ padding: '5px 14px', fontSize: 11, minHeight: 32 }}
+                            onClick={() => handleRenew(m.user_id)}
+                            disabled={renewingIds[m.user_id]}
+                            style={{ 
+                              padding: '5px 14px', fontSize: 11, minHeight: 32,
+                              background: 'transparent', color: '#22C55E',
+                              border: '1px solid #104A20', borderRadius: 3,
+                              cursor: renewingIds[m.user_id] ? 'not-allowed' : 'pointer',
+                              fontWeight: 600, transition: 'all 150ms ease'
+                            }}
                           >
-                            <Send size={11} /> SEND ALERT
+                            {renewingIds[m.user_id] ? '...' : 'MARK RENEWED'}
                           </button>
-                        )}
+                          
+                          {state === 'sending' ? (
+                            <span style={{ color: '#888', fontSize: 12, fontFamily: '"JetBrains Mono", monospace', width: 100, textAlign: 'center' }}>SENDING...</span>
+                          ) : state === 'sent' ? (
+                            <span style={{ color: '#22C55E', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 4, fontSize: 12, width: 100 }}><CheckCircle2 size={14} /> SENT</span>
+                          ) : state === 'failed' ? (
+                            <span style={{ color: '#E8001D', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 4, fontSize: 12, width: 100 }}><AlertCircle size={14} /> FAILED</span>
+                          ) : (
+                            <button
+                              onClick={() => handleSendSingle(m.user_id)}
+                              className="btn-secondary"
+                              style={{ padding: '5px 14px', fontSize: 11, minHeight: 32, width: 100, justifyContent: 'center' }}
+                            >
+                              <Send size={11} /> SEND ALERT
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   )
@@ -293,16 +326,30 @@ export default function AdminAlertsPage() {
                           </div>
                         )}
                       </div>
-                      <div style={{ flexShrink: 0 }}>
+                      <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'flex-end' }}>
+                        <button
+                          onClick={() => handleRenew(m.user_id)}
+                          disabled={renewingIds[m.user_id]}
+                          style={{ 
+                            padding: '4px 10px', fontSize: 10, minHeight: 28,
+                            background: 'transparent', color: '#22C55E',
+                            border: '1px solid #104A20', borderRadius: 3,
+                            cursor: renewingIds[m.user_id] ? 'not-allowed' : 'pointer',
+                            fontWeight: 600
+                          }}
+                        >
+                          {renewingIds[m.user_id] ? '...' : 'RENEW'}
+                        </button>
+
                         {state === 'sending' ? (
-                          <span style={{ fontSize: 11, color: '#888' }}>...</span>
+                          <span style={{ fontSize: 11, color: '#888', minHeight: 28, display: 'flex', alignItems: 'center' }}>...</span>
                         ) : state === 'sent' ? (
-                          <CheckCircle2 size={18} color="#22C55E" />
+                          <div style={{ minHeight: 28, display: 'flex', alignItems: 'center' }}><CheckCircle2 size={18} color="#22C55E" /></div>
                         ) : state === 'failed' ? (
-                          <AlertCircle size={18} color="#E8001D" />
+                          <div style={{ minHeight: 28, display: 'flex', alignItems: 'center' }}><AlertCircle size={18} color="#E8001D" /></div>
                         ) : (
-                          <button onClick={() => handleSendSingle(m.user_id)} className="btn-secondary" style={{ padding: '5px 12px', fontSize: 11, minHeight: 32 }}>
-                            <Send size={11} />
+                          <button onClick={() => handleSendSingle(m.user_id)} className="btn-secondary" style={{ padding: '4px 10px', fontSize: 10, minHeight: 28 }}>
+                            <Send size={10} />
                           </button>
                         )}
                       </div>

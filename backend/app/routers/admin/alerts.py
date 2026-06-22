@@ -217,6 +217,49 @@ async def send_manual_alert(
         raise HTTPException(status_code=400, detail=result["error"])
     return result
 
+@router.post("/renew/{user_id}")
+async def quick_renew_membership(
+    user_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    current_admin: User = Depends(get_current_user)
+):
+    if current_admin.role != "admin":
+        raise HTTPException(status_code=403, detail="Not authorized")
+    
+    # Get latest membership
+    stmt = (
+        select(Membership)
+        .options(selectinload(Membership.plan))
+        .where(Membership.user_id == user_id)
+        .order_by(Membership.end_date.desc())
+        .limit(1)
+    )
+    res = await db.execute(stmt)
+    old_m = res.scalar_one_or_none()
+    
+    if not old_m:
+        raise HTTPException(status_code=404, detail="No membership found to renew")
+
+    today = datetime.now(timezone.utc).date()
+    
+    # If expired, start today. If expiring soon, start from current end_date
+    start_date = today if old_m.end_date < today else old_m.end_date
+    end_date = start_date + timedelta(days=old_m.plan.duration_days)
+
+    new_m = Membership(
+        user_id=user_id,
+        plan_id=old_m.plan_id,
+        start_date=start_date,
+        end_date=end_date,
+        status="active",
+        amount_paid=old_m.plan.price,
+        payment_mode="Cash",
+        notes="Quick Renew from Alerts Dashboard"
+    )
+    db.add(new_m)
+    await db.commit()
+    return {"success": True, "new_end_date": end_date}
+
 @router.post("/send-all", response_model=SendAllResponse)
 async def send_manual_alerts_bulk(
     req: SendAllRequest,
