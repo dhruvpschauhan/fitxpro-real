@@ -1,52 +1,50 @@
 """
-Email service using Gmail SMTP with App Password.
-Sends real emails from dhruvpratapsinghchauhan9@gmail.com.
+Email service using Resend HTTP API.
+Works on all cloud platforms (no SMTP ports needed).
+Sends from your verified Resend domain/email.
 """
-import smtplib
-import ssl
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
-from email.utils import formataddr
+import urllib.request
+import urllib.error
+import json
 from app.config import settings
 
 
 def send_email(to_email: str, subject: str, html_body: str) -> dict:
     """
-    Send an HTML email via Gmail SMTP.
+    Send an HTML email via Resend API (HTTP POST — works on all cloud hosts).
     Returns {"success": True} or {"success": False, "error": str}
     """
-    gmail_user = settings.GMAIL_USER
-    gmail_password = settings.GMAIL_APP_PASSWORD
+    api_key = settings.RESEND_API_KEY
 
-    if not gmail_user or not gmail_password:
+    if not api_key or api_key == "re_stub":
         return {
             "success": False,
-            "error": "Gmail SMTP not configured. Set GMAIL_USER and GMAIL_APP_PASSWORD in .env"
+            "error": "Resend API key not configured. Set RESEND_API_KEY in Render environment variables."
         }
 
-    # Build the message
-    msg = MIMEMultipart("alternative")
-    msg["Subject"] = subject
-    msg["From"] = formataddr(("FitX Pro", gmail_user))
-    msg["To"] = to_email
+    payload = json.dumps({
+        "from": settings.EMAIL_FROM,
+        "to": [to_email],
+        "subject": subject,
+        "html": html_body,
+    }).encode("utf-8")
 
-    # Attach HTML part
-    part = MIMEText(html_body, "html", "utf-8")
-    msg.attach(part)
+    req = urllib.request.Request(
+        "https://api.resend.com/emails",
+        data=payload,
+        headers={
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json",
+        },
+        method="POST",
+    )
 
     try:
-        context = ssl.create_default_context()
-        with smtplib.SMTP("smtp.gmail.com", 587) as server:
-            server.starttls(context=context)
-            server.login(gmail_user, gmail_password)
-            server.sendmail(gmail_user, to_email, msg.as_string())
-        return {"success": True}
-    except smtplib.SMTPAuthenticationError:
-        return {
-            "success": False,
-            "error": "Gmail authentication failed. Check your App Password in .env (GMAIL_APP_PASSWORD)."
-        }
-    except smtplib.SMTPException as e:
-        return {"success": False, "error": f"SMTP error: {str(e)}"}
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            body = json.loads(resp.read().decode())
+            return {"success": True, "id": body.get("id")}
+    except urllib.error.HTTPError as e:
+        error_body = e.read().decode()
+        return {"success": False, "error": f"Resend HTTP {e.code}: {error_body}"}
     except Exception as e:
         return {"success": False, "error": str(e)}
