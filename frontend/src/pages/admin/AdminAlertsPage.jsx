@@ -311,7 +311,7 @@ export default function AdminAlertsPage() {
             </table>
 
             {/* Mobile Cards */}
-            <div className="show-mobile" style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+            <div className="show-mobile mobile-cards">
               {members.map((m, i) => {
                 const { label, cls } = urgencyLabel(m.days_remaining)
                 const waState = whatsappIds[m.user_id]

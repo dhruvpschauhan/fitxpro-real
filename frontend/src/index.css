@@ -656,9 +656,11 @@ input[type="file"].input::file-selector-button:hover {
 /* Hide on mobile / show on desktop */
 .hide-mobile  { }
 .show-mobile  { display: none; }
+.mobile-cards { display: none; }
 @media (max-width: 767px) {
   .hide-mobile  { display: none !important; }
   .show-mobile  { display: block; }
+  .mobile-cards { display: flex; flex-direction: column; gap: 1px; }
 }
 .hide-tablet { }
 @media (min-width: 768px) and (max-width: 1023px) {
