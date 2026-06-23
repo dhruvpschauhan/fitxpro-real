@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Bell, ChevronDown, ChevronUp, CheckCircle2, AlertCircle, Clock, Send, Users, MailCheck, MessageCircle } from 'lucide-react'
+import { Bell, ChevronDown, ChevronUp, CheckCircle2, AlertCircle, Users, MailCheck, MessageCircle, RefreshCw } from 'lucide-react'
 import client from '../../api/client'
 
 export default function AdminAlertsPage() {
@@ -8,13 +8,12 @@ export default function AdminAlertsPage() {
   const [members,    setMembers]    = useState([])
   const [loading,    setLoading]    = useState(true)
   const [sendingAll, setSendingAll] = useState(false)
-  const [sendingIds, setSendingIds] = useState({})
-  const [renewingIds, setRenewingIds] = useState({})
   const [whatsappIds, setWhatsappIds] = useState({})
+  const [renewingIds, setRenewingIds] = useState({})
   const [showLogs,   setShowLogs]   = useState(false)
   const [logs,       setLogs]       = useState([])
   const [logsLoading, setLogsLoading] = useState(false)
-  const [toast,      setToast]      = useState(null)  // { msg, type }
+  const [toast,      setToast]      = useState(null)
 
   const showToast = (msg, type = 'success') => {
     setToast({ msg, type })
@@ -45,62 +44,46 @@ export default function AdminAlertsPage() {
   useEffect(() => { fetchMembers() }, [activeTab, daysFilter])
   useEffect(() => { if (showLogs) fetchLogs() }, [showLogs])
 
-  const handleSendSingle = async (userId) => {
-    setSendingIds(prev => ({ ...prev, [userId]: 'sending' }))
+  const handleWhatsapp = async (userId) => {
+    setWhatsappIds(prev => ({ ...prev, [userId]: 'sending' }))
     try {
-      await client.post(`/admin/alerts/send/${userId}`)
-      setSendingIds(prev => ({ ...prev, [userId]: 'sent' }))
+      await client.post(`/admin/alerts/whatsapp/${userId}`)
+      setWhatsappIds(prev => ({ ...prev, [userId]: 'sent' }))
       setMembers(prev => prev.map(m => m.user_id === userId
         ? { ...m, last_alerted_at: new Date().toISOString() } : m))
-      showToast('Alert sent successfully!')
-      setTimeout(() => setSendingIds(prev => ({ ...prev, [userId]: null })), 3000)
+      showToast('WhatsApp alert sent!')
+      setTimeout(() => setWhatsappIds(prev => ({ ...prev, [userId]: null })), 3000)
     } catch (e) {
-      setSendingIds(prev => ({ ...prev, [userId]: 'failed' }))
-      showToast('Failed to send alert.', 'error')
-      setTimeout(() => setSendingIds(prev => ({ ...prev, [userId]: null })), 3000)
+      setWhatsappIds(prev => ({ ...prev, [userId]: 'failed' }))
+      showToast(e.response?.data?.detail || 'Failed to send WhatsApp.', 'error')
+      setTimeout(() => setWhatsappIds(prev => ({ ...prev, [userId]: null })), 3000)
     }
   }
 
   const handleRenew = async (userId) => {
-    if (!window.confirm("Mark this member as renewed? This will add 30 days to their current plan.")) return
+    if (!window.confirm('Mark this member as renewed? This will extend their plan by its full duration.')) return
     setRenewingIds(prev => ({ ...prev, [userId]: true }))
     try {
       await client.post(`/admin/alerts/renew/${userId}`)
       showToast('Membership renewed successfully!')
-      // Remove them from the list
       setMembers(prev => prev.filter(m => m.user_id !== userId))
     } catch (e) {
-      console.error(e)
       showToast('Failed to renew membership.', 'error')
     } finally {
       setRenewingIds(prev => ({ ...prev, [userId]: false }))
     }
   }
 
-  const handleWhatsapp = async (userId) => {
-    setWhatsappIds(prev => ({ ...prev, [userId]: 'sending' }))
-    try {
-      await client.post(`/admin/alerts/whatsapp/${userId}`)
-      setWhatsappIds(prev => ({ ...prev, [userId]: 'sent' }))
-      showToast('WhatsApp message sent!')
-      setTimeout(() => setWhatsappIds(prev => ({ ...prev, [userId]: null })), 3000)
-    } catch (e) {
-      setWhatsappIds(prev => ({ ...prev, [userId]: 'failed' }))
-      showToast(e.response?.data?.detail || 'WhatsApp send failed.', 'error')
-      setTimeout(() => setWhatsappIds(prev => ({ ...prev, [userId]: null })), 3000)
-    }
-  }
-
   const handleSendAll = async () => {
-    if (!window.confirm(`Send renewal reminder to all ${members.length} members in this list?`)) return
+    if (!window.confirm(`Send WhatsApp alert to all ${members.length} members in this list?`)) return
     setSendingAll(true)
     try {
       const uids = members.map(m => m.user_id)
       const res = await client.post('/admin/alerts/send-all', { user_ids: uids })
-      showToast(`Sent to ${res.data.sent} members. ${res.data.failed > 0 ? res.data.failed + ' failed.' : ''}`)
+      showToast(`Sent to ${res.data.sent} members via WhatsApp.${res.data.failed > 0 ? ` ${res.data.failed} failed.` : ''}`)
       fetchMembers()
     } catch (e) {
-      showToast('Failed to send bulk alerts.', 'error')
+      showToast('Failed to send bulk WhatsApp alerts.', 'error')
     } finally { setSendingAll(false) }
   }
 
@@ -146,11 +129,12 @@ export default function AdminAlertsPage() {
       <div className="page-header">
         <div>
           <h1 className="text-page-title">MEMBER ALERTS</h1>
-          <p style={{ color: '#444', fontSize: 13, marginTop: 4 }}>Monitor and notify members about membership status</p>
+          <p style={{ color: '#444', fontSize: 13, marginTop: 4 }}>Send WhatsApp renewal reminders to members</p>
         </div>
         {members.length > 0 && (
-          <button className="btn-primary" onClick={handleSendAll} disabled={sendingAll}>
-            <Send size={14} strokeWidth={2.5} />
+          <button className="btn-primary" onClick={handleSendAll} disabled={sendingAll}
+            style={{ background: '#25D366', borderColor: '#25D366', color: '#000' }}>
+            <MessageCircle size={14} strokeWidth={2.5} />
             {sendingAll ? 'SENDING...' : `SEND TO ALL (${members.length})`}
           </button>
         )}
@@ -159,10 +143,10 @@ export default function AdminAlertsPage() {
       {/* Stat Cards */}
       <div className="grid-stats" style={{ marginBottom: '1.75rem' }}>
         {[
-          { icon: Users,     label: 'IN THIS LIST',    value: members.length,  color: '#F0F0F0' },
-          { icon: AlertCircle, label: 'CRITICAL (≤3D)', value: criticalCount,  color: '#E8001D' },
-          { icon: MailCheck, label: 'ALREADY ALERTED', value: alertedCount,    color: '#22C55E' },
-          { icon: Bell,      label: 'NOT YET ALERTED', value: members.length - alertedCount, color: '#F59E0B' },
+          { icon: Users,         label: 'IN THIS LIST',    value: members.length,              color: '#F0F0F0' },
+          { icon: AlertCircle,   label: 'CRITICAL (≤3D)',  value: criticalCount,               color: '#E8001D' },
+          { icon: MessageCircle, label: 'ALREADY ALERTED', value: alertedCount,                color: '#25D366' },
+          { icon: Bell,          label: 'NOT YET ALERTED', value: members.length - alertedCount, color: '#F59E0B' },
         ].map(({ icon: Icon, label, value, color }) => (
           <div key={label} className="card-stat">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
@@ -176,7 +160,6 @@ export default function AdminAlertsPage() {
 
       {/* Tab Bar + Filter */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.75rem' }}>
-        {/* Tabs */}
         <div style={{ display: 'flex', gap: 2, background: '#111', border: '1px solid #1E1E1E', borderRadius: 4, padding: 3 }}>
           {['expiring', 'expired'].map(tab => (
             <button
@@ -197,7 +180,6 @@ export default function AdminAlertsPage() {
           ))}
         </div>
 
-        {/* Days filter (only for expiring tab) */}
         {activeTab === 'expiring' && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <span className="text-label-sm">WITHIN</span>
@@ -242,21 +224,25 @@ export default function AdminAlertsPage() {
               <thead>
                 <tr>
                   <th>MEMBER</th>
+                  <th>PHONE</th>
                   <th>PLAN</th>
                   <th>{activeTab === 'expiring' ? 'URGENCY' : 'EXPIRED ON'}</th>
                   <th>LAST ALERTED</th>
-                  <th style={{ textAlign: 'right' }}>ACTION</th>
+                  <th style={{ textAlign: 'right' }}>ACTIONS</th>
                 </tr>
               </thead>
               <tbody>
                 {members.map(m => {
                   const { label, cls } = urgencyLabel(m.days_remaining)
-                  const state = sendingIds[m.user_id]
+                  const waState = whatsappIds[m.user_id]
                   return (
                     <tr key={m.user_id}>
                       <td>
                         <div style={{ fontWeight: 600 }}>{m.full_name}</div>
                         <div style={{ fontSize: 12, color: '#555', fontFamily: '"JetBrains Mono", monospace', marginTop: 2 }}>{m.email}</div>
+                      </td>
+                      <td style={{ color: '#888', fontSize: 12, fontFamily: '"JetBrains Mono", monospace' }}>
+                        {m.phone || <span style={{ color: '#333' }}>—</span>}
                       </td>
                       <td style={{ color: '#888', fontSize: 13 }}>{m.plan_name}</td>
                       <td>
@@ -270,7 +256,7 @@ export default function AdminAlertsPage() {
                       <td>
                         {m.last_alerted_at ? (
                           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                            <MailCheck size={13} color="#22C55E" />
+                            <MessageCircle size={13} color="#25D366" />
                             <span style={{ fontSize: 12, color: '#888', fontFamily: '"JetBrains Mono", monospace' }}>{formatDate(m.last_alerted_at)}</span>
                           </div>
                         ) : (
@@ -283,54 +269,37 @@ export default function AdminAlertsPage() {
                           <button
                             onClick={() => handleRenew(m.user_id)}
                             disabled={renewingIds[m.user_id]}
-                            style={{ 
+                            style={{
                               padding: '5px 14px', fontSize: 11, minHeight: 32,
                               background: 'transparent', color: '#22C55E',
                               border: '1px solid #104A20', borderRadius: 3,
                               cursor: renewingIds[m.user_id] ? 'not-allowed' : 'pointer',
-                              fontWeight: 600, transition: 'all 150ms ease'
+                              fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 5
                             }}
                           >
-                            {renewingIds[m.user_id] ? '...' : 'MARK RENEWED'}
+                            <RefreshCw size={11} />
+                            {renewingIds[m.user_id] ? '...' : 'RENEW'}
                           </button>
 
                           {/* WhatsApp */}
-                          {whatsappIds[m.user_id] === 'sending' ? (
-                            <span style={{ fontSize: 11, color: '#888', width: 36, textAlign: 'center' }}>...</span>
-                          ) : whatsappIds[m.user_id] === 'sent' ? (
-                            <span title="WhatsApp sent"><CheckCircle2 size={16} color="#25D366" /></span>
-                          ) : whatsappIds[m.user_id] === 'failed' ? (
-                            <span title="WhatsApp failed"><AlertCircle size={16} color="#E8001D" /></span>
+                          {waState === 'sending' ? (
+                            <span style={{ color: '#888', fontSize: 12, fontFamily: '"JetBrains Mono", monospace', width: 110, textAlign: 'center' }}>SENDING...</span>
+                          ) : waState === 'sent' ? (
+                            <span style={{ color: '#25D366', display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12, width: 110, justifyContent: 'center' }}><CheckCircle2 size={14} /> SENT</span>
+                          ) : waState === 'failed' ? (
+                            <span style={{ color: '#E8001D', display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12, width: 110, justifyContent: 'center' }}><AlertCircle size={14} /> FAILED</span>
                           ) : (
                             <button
                               onClick={() => handleWhatsapp(m.user_id)}
-                              title="Send WhatsApp alert"
                               style={{
-                                padding: '5px 10px', minHeight: 32, fontSize: 11,
-                                background: 'transparent', color: '#25D366',
+                                padding: '5px 14px', fontSize: 11, minHeight: 32, width: 110, justifyContent: 'center',
+                                background: '#0A1F0F', color: '#25D366',
                                 border: '1px solid #0A3A1A', borderRadius: 3,
                                 cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 5,
                                 fontWeight: 600, transition: 'all 150ms ease'
                               }}
                             >
-                              <MessageCircle size={12} /> WA
-                            </button>
-                          )}
-
-                          {/* Email alert */}
-                          {state === 'sending' ? (
-                            <span style={{ color: '#888', fontSize: 12, fontFamily: '"JetBrains Mono", monospace', width: 100, textAlign: 'center' }}>SENDING...</span>
-                          ) : state === 'sent' ? (
-                            <span style={{ color: '#22C55E', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 4, fontSize: 12, width: 100 }}><CheckCircle2 size={14} /> SENT</span>
-                          ) : state === 'failed' ? (
-                            <span style={{ color: '#E8001D', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 4, fontSize: 12, width: 100 }}><AlertCircle size={14} /> FAILED</span>
-                          ) : (
-                            <button
-                              onClick={() => handleSendSingle(m.user_id)}
-                              className="btn-secondary"
-                              style={{ padding: '5px 14px', fontSize: 11, minHeight: 32, width: 100, justifyContent: 'center' }}
-                            >
-                              <Send size={11} /> EMAIL
+                              <MessageCircle size={11} /> SEND WA
                             </button>
                           )}
                         </div>
@@ -345,7 +314,7 @@ export default function AdminAlertsPage() {
             <div className="show-mobile" style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
               {members.map((m, i) => {
                 const { label, cls } = urgencyLabel(m.days_remaining)
-                const state = sendingIds[m.user_id]
+                const waState = whatsappIds[m.user_id]
                 return (
                   <div key={m.user_id} style={{
                     padding: '1rem',
@@ -354,14 +323,14 @@ export default function AdminAlertsPage() {
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ fontWeight: 600, fontSize: 14, color: '#F0F0F0' }}>{m.full_name}</div>
-                        <div style={{ fontSize: 11, color: '#555', fontFamily: '"JetBrains Mono", monospace', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.email}</div>
+                        <div style={{ fontSize: 11, color: '#666', fontFamily: '"JetBrains Mono", monospace', marginTop: 2 }}>{m.phone || m.email}</div>
                         <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                           <span className={cls}>{label}</span>
                           <span style={{ fontSize: 11, color: '#555' }}>{m.plan_name}</span>
                         </div>
                         {m.last_alerted_at && (
                           <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 6 }}>
-                            <MailCheck size={11} color="#22C55E" />
+                            <MessageCircle size={11} color="#25D366" />
                             <span style={{ fontSize: 11, color: '#555', fontFamily: '"JetBrains Mono", monospace' }}>{formatDate(m.last_alerted_at)}</span>
                           </div>
                         )}
@@ -371,43 +340,31 @@ export default function AdminAlertsPage() {
                         <button
                           onClick={() => handleRenew(m.user_id)}
                           disabled={renewingIds[m.user_id]}
-                          style={{ 
+                          style={{
                             padding: '4px 10px', fontSize: 10, minHeight: 28,
                             background: 'transparent', color: '#22C55E',
                             border: '1px solid #104A20', borderRadius: 3,
                             cursor: renewingIds[m.user_id] ? 'not-allowed' : 'pointer',
-                            fontWeight: 600
+                            fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4
                           }}
                         >
+                          <RefreshCw size={9} />
                           {renewingIds[m.user_id] ? '...' : 'RENEW'}
                         </button>
 
                         {/* WhatsApp */}
-                        {whatsappIds[m.user_id] === 'sending' ? (
+                        {waState === 'sending' ? (
                           <span style={{ fontSize: 10, color: '#888', minHeight: 28, display: 'flex', alignItems: 'center' }}>...</span>
-                        ) : whatsappIds[m.user_id] === 'sent' ? (
-                          <div style={{ minHeight: 28, display: 'flex', alignItems: 'center' }}><MessageCircle size={16} color="#25D366" /></div>
-                        ) : whatsappIds[m.user_id] === 'failed' ? (
-                          <div style={{ minHeight: 28, display: 'flex', alignItems: 'center' }}><AlertCircle size={16} color="#E8001D" /></div>
+                        ) : waState === 'sent' ? (
+                          <div style={{ minHeight: 28, display: 'flex', alignItems: 'center' }}><CheckCircle2 size={18} color="#25D366" /></div>
+                        ) : waState === 'failed' ? (
+                          <div style={{ minHeight: 28, display: 'flex', alignItems: 'center' }}><AlertCircle size={18} color="#E8001D" /></div>
                         ) : (
                           <button
                             onClick={() => handleWhatsapp(m.user_id)}
-                            style={{ padding: '4px 8px', fontSize: 10, minHeight: 28, background: 'transparent', color: '#25D366', border: '1px solid #0A3A1A', borderRadius: 3, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, fontWeight: 600 }}
+                            style={{ padding: '4px 10px', fontSize: 10, minHeight: 28, background: '#0A1F0F', color: '#25D366', border: '1px solid #0A3A1A', borderRadius: 3, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, fontWeight: 600 }}
                           >
                             <MessageCircle size={10} /> WA
-                          </button>
-                        )}
-
-                        {/* Email */}
-                        {state === 'sending' ? (
-                          <span style={{ fontSize: 11, color: '#888', minHeight: 28, display: 'flex', alignItems: 'center' }}>...</span>
-                        ) : state === 'sent' ? (
-                          <div style={{ minHeight: 28, display: 'flex', alignItems: 'center' }}><CheckCircle2 size={18} color="#22C55E" /></div>
-                        ) : state === 'failed' ? (
-                          <div style={{ minHeight: 28, display: 'flex', alignItems: 'center' }}><AlertCircle size={18} color="#E8001D" /></div>
-                        ) : (
-                          <button onClick={() => handleSendSingle(m.user_id)} className="btn-secondary" style={{ padding: '4px 10px', fontSize: 10, minHeight: 28 }}>
-                            <Send size={10} />
                           </button>
                         )}
                       </div>
@@ -448,7 +405,7 @@ export default function AdminAlertsPage() {
                 <thead>
                   <tr>
                     <th>MEMBER</th>
-                    <th className="hide-mobile">EMAIL</th>
+                    <th className="hide-mobile">PHONE</th>
                     <th className="hide-mobile">REASON</th>
                     <th>SENT AT</th>
                     <th style={{ textAlign: 'right' }}>STATUS</th>
@@ -458,7 +415,7 @@ export default function AdminAlertsPage() {
                   {logs.map(l => (
                     <tr key={l.id}>
                       <td style={{ fontWeight: 500 }}>{l.user_name}</td>
-                      <td className="hide-mobile" style={{ color: '#555', fontFamily: '"JetBrains Mono", monospace', fontSize: 12 }}>{l.recipient_email}</td>
+                      <td className="hide-mobile" style={{ color: '#555', fontFamily: '"JetBrains Mono", monospace', fontSize: 12 }}>{l.recipient_phone}</td>
                       <td className="hide-mobile" style={{ color: '#888', textTransform: 'uppercase', fontSize: 11, letterSpacing: '0.04em' }}>{l.trigger_reason?.replace(/_/g, ' ')}</td>
                       <td style={{ color: '#888', fontFamily: '"JetBrains Mono", monospace', fontSize: 12 }}>{formatDate(l.sent_at)}</td>
                       <td style={{ textAlign: 'right' }}>

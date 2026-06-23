@@ -12,9 +12,6 @@ from app.database import get_db
 from app.models import User, Membership
 from app.models.extra_models import NotificationLog
 from app.routers.auth import get_current_user
-from app.config import settings
-from app.services.email_templates import get_email_template
-from app.services.email_service import send_email
 from app.services.whatsapp_service import send_whatsapp
 
 router = APIRouter(prefix="/admin/alerts", tags=["Admin Alerts"])
@@ -51,6 +48,66 @@ async def _get_last_alerts(user_ids: List[uuid.UUID], db: AsyncSession) -> dict:
     )
     res = await db.execute(stmt)
     return {row.user_id: row.last_sent for row in res}
+
+async def _send_whatsapp_alert(user_id: uuid.UUID, db: AsyncSession, admin_id: uuid.UUID) -> dict:
+    """Internal helper: send a WhatsApp alert for a given user_id."""
+    stmt = (
+        select(Membership)
+        .options(selectinload(Membership.user), selectinload(Membership.plan))
+        .where(Membership.user_id == user_id)
+        .order_by(Membership.end_date.desc())
+        .limit(1)
+    )
+    res = await db.execute(stmt)
+    m = res.scalar_one_or_none()
+
+    if not m:
+        return {"success": False, "error": "No membership found"}
+
+    user = m.user
+    if not user.phone:
+        return {"success": False, "error": "Member has no phone number on file"}
+
+    today = datetime.now(timezone.utc).date()
+    days_rem = (m.end_date - today).days
+    expiry_str = m.end_date.strftime("%d %B %Y")
+
+    if days_rem < 0:
+        msg = (
+            f"Hi {user.full_name} 👋\n\n"
+            f"Your *{m.plan.name}* membership at *FitX Pro* expired on *{expiry_str}*."
+            f" Renew now to keep your fitness streak going! 💪\n\n"
+            f"Visit us or contact reception to renew."
+        )
+    elif days_rem == 0:
+        msg = (
+            f"Hi {user.full_name} 👋\n\n"
+            f"Your *{m.plan.name}* membership at *FitX Pro* expires *TODAY*! ⚠️"
+            f" Renew before end of day to avoid any interruption.\n\n"
+            f"Visit us or contact reception to renew."
+        )
+    else:
+        msg = (
+            f"Hi {user.full_name} 👋\n\n"
+            f"Your *{m.plan.name}* membership at *FitX Pro* expires in *{days_rem} day{'s' if days_rem != 1 else ''}* on *{expiry_str}*. ⏳"
+            f"\n\nRenew early to avoid any break in your training! 💪\n\n"
+            f"Visit us or contact reception to renew."
+        )
+
+    result = send_whatsapp(to_phone=user.phone, body=msg)
+
+    log = NotificationLog(
+        user_id=user.id,
+        trigger_reason="whatsapp_manual",
+        status="sent" if result["success"] else "failed",
+        recipient_email=user.phone,
+        error_message=result.get("error"),
+        triggered_by=admin_id
+    )
+    db.add(log)
+    await db.commit()
+
+    return {"success": result["success"], "error": result.get("error"), "sent_to": user.phone}
 
 # ── Endpoints ───────────────────────────────────────────────────────────
 
@@ -96,8 +153,6 @@ async def get_expiring_members(
             days_remaining=days_rem,
             last_alerted_at=last_alerts.get(m.user_id)
         ))
-    
-    # Sort by days remaining ascending
     out.sort(key=lambda x: x.days_remaining)
     return out
 
@@ -114,12 +169,7 @@ async def get_expired_members(
     stmt = (
         select(Membership)
         .options(selectinload(Membership.user), selectinload(Membership.plan))
-        .where(
-            # Use end_date <= today so members expiring TODAY also show up.
-            # We don't filter on status='expired' because the system has no
-            # background job to auto-flip statuses — end_date is the source of truth.
-            Membership.end_date <= today
-        )
+        .where(Membership.end_date <= today)
     )
     res = await db.execute(stmt)
     memberships = res.scalars().all()
@@ -129,7 +179,7 @@ async def get_expired_members(
 
     out = []
     for m in memberships:
-        days_rem = (m.end_date - today).days  # will be negative
+        days_rem = (m.end_date - today).days
         out.append(AlertMemberOut(
             user_id=m.user_id,
             full_name=m.user.full_name,
@@ -140,83 +190,23 @@ async def get_expired_members(
             days_remaining=days_rem,
             last_alerted_at=last_alerts.get(m.user_id)
         ))
-    
-    # Sort by most recently expired first
     out.sort(key=lambda x: x.end_date, reverse=True)
     return out
 
-async def _send_manual_alert(user_id: uuid.UUID, db: AsyncSession, admin_id: uuid.UUID) -> dict:
-    # Get user and their latest membership
-    stmt = (
-        select(Membership)
-        .options(selectinload(Membership.user), selectinload(Membership.plan))
-        .where(Membership.user_id == user_id)
-        .order_by(Membership.end_date.desc())
-        .limit(1)
-    )
-    res = await db.execute(stmt)
-    m = res.scalar_one_or_none()
-
-    if not m:
-        return {"success": False, "error": "No membership found"}
-
-    user = m.user
-    if not user.email:
-        return {"success": False, "error": "User has no email address"}
-
-    today = datetime.now(timezone.utc).date()
-    expiry_str = m.end_date.strftime("%d %B %Y")
-
-    template = get_email_template("manual", {
-        "full_name": user.full_name,
-        "plan_name": m.plan.name,
-        "expiry_date": expiry_str
-    })
-
-    try:
-        result = send_email(
-            to_email=user.email,
-            subject=template["subject"],
-            html_body=template["html"]
-        )
-        if not result["success"]:
-            raise Exception(result["error"])
-        log = NotificationLog(
-            user_id=user.id,
-            trigger_reason="manual",
-            status="sent",
-            recipient_email=user.email,
-            triggered_by=admin_id
-        )
-        db.add(log)
-        await db.commit()
-        return {"success": True, "sent_to": user.email}
-    except Exception as e:
-        log = NotificationLog(
-            user_id=user.id,
-            trigger_reason="manual",
-            status="failed",
-            recipient_email=user.email,
-            error_message=str(e),
-            triggered_by=admin_id
-        )
-        db.add(log)
-        await db.commit()
-        return {"success": False, "error": str(e)}
-
-@router.post("/send/{user_id}")
-async def send_manual_alert(
+@router.post("/whatsapp/{user_id}")
+async def send_single_whatsapp_alert(
     user_id: uuid.UUID,
     db: AsyncSession = Depends(get_db),
     current_admin: User = Depends(get_current_user)
 ):
+    """Send a WhatsApp renewal reminder to a single member."""
     if current_admin.role != "admin":
         raise HTTPException(status_code=403, detail="Not authorized")
-    
-    result = await _send_manual_alert(user_id, db, current_admin.id)
+
+    result = await _send_whatsapp_alert(user_id, db, current_admin.id)
     if not result["success"]:
         raise HTTPException(status_code=400, detail=result["error"])
-    return result
+    return {"success": True, "sent_to": result.get("sent_to")}
 
 @router.post("/renew/{user_id}")
 async def quick_renew_membership(
@@ -226,8 +216,7 @@ async def quick_renew_membership(
 ):
     if current_admin.role != "admin":
         raise HTTPException(status_code=403, detail="Not authorized")
-    
-    # Get latest membership
+
     stmt = (
         select(Membership)
         .options(selectinload(Membership.plan))
@@ -237,13 +226,11 @@ async def quick_renew_membership(
     )
     res = await db.execute(stmt)
     old_m = res.scalar_one_or_none()
-    
+
     if not old_m:
         raise HTTPException(status_code=404, detail="No membership found to renew")
 
     today = datetime.now(timezone.utc).date()
-    
-    # If expired, start today. If expiring soon, start from current end_date
     start_date = today if old_m.end_date < today else old_m.end_date
     end_date = start_date + timedelta(days=old_m.plan.duration_days)
 
@@ -261,84 +248,13 @@ async def quick_renew_membership(
     await db.commit()
     return {"success": True, "new_end_date": end_date}
 
-@router.post("/whatsapp/{user_id}")
-async def send_whatsapp_alert(
-    user_id: uuid.UUID,
-    db: AsyncSession = Depends(get_db),
-    current_admin: User = Depends(get_current_user)
-):
-    """Send a WhatsApp renewal reminder to a member via Twilio."""
-    if current_admin.role != "admin":
-        raise HTTPException(status_code=403, detail="Not authorized")
-
-    # Get latest membership
-    stmt = (
-        select(Membership)
-        .options(selectinload(Membership.user), selectinload(Membership.plan))
-        .where(Membership.user_id == user_id)
-        .order_by(Membership.end_date.desc())
-        .limit(1)
-    )
-    res = await db.execute(stmt)
-    m = res.scalar_one_or_none()
-
-    if not m:
-        raise HTTPException(status_code=404, detail="No membership found")
-
-    user = m.user
-    if not user.phone:
-        raise HTTPException(status_code=400, detail="Member has no phone number on file")
-
-    today = datetime.now(timezone.utc).date()
-    days_rem = (m.end_date - today).days
-    expiry_str = m.end_date.strftime("%d %B %Y")
-
-    if days_rem < 0:
-        msg = (
-            f"Hi {user.full_name} 👋\n\n"
-            f"Your *{m.plan.name}* membership at *FitX Pro* expired on *{expiry_str}*."
-            f" Renew now to keep your fitness streak going! 💪\n\n"
-            f"Visit us or contact reception to renew."
-        )
-    elif days_rem == 0:
-        msg = (
-            f"Hi {user.full_name} 👋\n\n"
-            f"Your *{m.plan.name}* membership at *FitX Pro* expires *TODAY*! ⚠️"
-            f" Renew before end of day to avoid any interruption.\n\n"
-            f"Visit us or contact reception to renew."
-        )
-    else:
-        msg = (
-            f"Hi {user.full_name} 👋\n\n"
-            f"Your *{m.plan.name}* membership at *FitX Pro* expires in *{days_rem} day{'s' if days_rem != 1 else ''}* on *{expiry_str}*. ⏳"
-            f"\n\nRenew early to avoid any break in your training! 💪\n\n"
-            f"Visit us or contact reception to renew."
-        )
-
-    result = send_whatsapp(to_phone=user.phone, body=msg)
-
-    # Log it
-    log = NotificationLog(
-        user_id=user.id,
-        trigger_reason="whatsapp_manual",
-        status="sent" if result["success"] else "failed",
-        recipient_email=user.phone,  # reusing field for phone
-        error_message=result.get("error"),
-        triggered_by=current_admin.id
-    )
-    db.add(log)
-    await db.commit()
-
-    if not result["success"]:
-        raise HTTPException(status_code=400, detail=result["error"])
-    return {"success": True, "sent_to": user.phone}
-
 @router.post("/send-all", response_model=SendAllResponse)
-async def send_manual_alerts_bulk(
+async def send_whatsapp_alerts_bulk(
     req: SendAllRequest,
     db: AsyncSession = Depends(get_db),
     current_admin: User = Depends(get_current_user)
 ):
+    """Send WhatsApp alerts to all provided user IDs."""
     if current_admin.role != "admin":
         raise HTTPException(status_code=403, detail="Not authorized")
 
@@ -347,16 +263,16 @@ async def send_manual_alerts_bulk(
     errors = []
 
     for uid in req.user_ids:
-        result = await _send_manual_alert(uid, db, current_admin.id)
+        result = await _send_whatsapp_alert(uid, db, current_admin.id)
         if result["success"]:
             sent += 1
         else:
             failed += 1
             errors.append({"user_id": str(uid), "error": result["error"]})
-        
-        # 200ms delay to avoid rate limits
-        await asyncio.sleep(0.2)
-    
+
+        # Small delay to respect Twilio rate limits
+        await asyncio.sleep(0.3)
+
     return SendAllResponse(sent=sent, failed=failed, errors=errors)
 
 @router.get("/logs")
@@ -374,13 +290,13 @@ async def get_recent_logs(
         .limit(50)
     )
     res = await db.execute(stmt)
-    
+
     out = []
     for log, name in res:
         out.append({
             "id": log.id,
             "user_name": name,
-            "recipient_email": log.recipient_email,
+            "recipient_phone": log.recipient_email,  # field stores phone now
             "trigger_reason": log.trigger_reason,
             "sent_at": log.sent_at,
             "status": log.status,
