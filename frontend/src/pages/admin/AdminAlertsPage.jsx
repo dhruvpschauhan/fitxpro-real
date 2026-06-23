@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Bell, ChevronDown, ChevronUp, CheckCircle2, AlertCircle, Clock, Send, Users, MailCheck } from 'lucide-react'
+import { Bell, ChevronDown, ChevronUp, CheckCircle2, AlertCircle, Clock, Send, Users, MailCheck, MessageCircle } from 'lucide-react'
 import client from '../../api/client'
 
 export default function AdminAlertsPage() {
@@ -10,6 +10,7 @@ export default function AdminAlertsPage() {
   const [sendingAll, setSendingAll] = useState(false)
   const [sendingIds, setSendingIds] = useState({})
   const [renewingIds, setRenewingIds] = useState({})
+  const [whatsappIds, setWhatsappIds] = useState({})
   const [showLogs,   setShowLogs]   = useState(false)
   const [logs,       setLogs]       = useState([])
   const [logsLoading, setLogsLoading] = useState(false)
@@ -73,6 +74,20 @@ export default function AdminAlertsPage() {
       showToast('Failed to renew membership.', 'error')
     } finally {
       setRenewingIds(prev => ({ ...prev, [userId]: false }))
+    }
+  }
+
+  const handleWhatsapp = async (userId) => {
+    setWhatsappIds(prev => ({ ...prev, [userId]: 'sending' }))
+    try {
+      await client.post(`/admin/alerts/whatsapp/${userId}`)
+      setWhatsappIds(prev => ({ ...prev, [userId]: 'sent' }))
+      showToast('WhatsApp message sent!')
+      setTimeout(() => setWhatsappIds(prev => ({ ...prev, [userId]: null })), 3000)
+    } catch (e) {
+      setWhatsappIds(prev => ({ ...prev, [userId]: 'failed' }))
+      showToast(e.response?.data?.detail || 'WhatsApp send failed.', 'error')
+      setTimeout(() => setWhatsappIds(prev => ({ ...prev, [userId]: null })), 3000)
     }
   }
 
@@ -264,6 +279,7 @@ export default function AdminAlertsPage() {
                       </td>
                       <td style={{ textAlign: 'right' }}>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 8 }}>
+                          {/* Mark Renewed */}
                           <button
                             onClick={() => handleRenew(m.user_id)}
                             disabled={renewingIds[m.user_id]}
@@ -277,7 +293,31 @@ export default function AdminAlertsPage() {
                           >
                             {renewingIds[m.user_id] ? '...' : 'MARK RENEWED'}
                           </button>
-                          
+
+                          {/* WhatsApp */}
+                          {whatsappIds[m.user_id] === 'sending' ? (
+                            <span style={{ fontSize: 11, color: '#888', width: 36, textAlign: 'center' }}>...</span>
+                          ) : whatsappIds[m.user_id] === 'sent' ? (
+                            <span title="WhatsApp sent"><CheckCircle2 size={16} color="#25D366" /></span>
+                          ) : whatsappIds[m.user_id] === 'failed' ? (
+                            <span title="WhatsApp failed"><AlertCircle size={16} color="#E8001D" /></span>
+                          ) : (
+                            <button
+                              onClick={() => handleWhatsapp(m.user_id)}
+                              title="Send WhatsApp alert"
+                              style={{
+                                padding: '5px 10px', minHeight: 32, fontSize: 11,
+                                background: 'transparent', color: '#25D366',
+                                border: '1px solid #0A3A1A', borderRadius: 3,
+                                cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 5,
+                                fontWeight: 600, transition: 'all 150ms ease'
+                              }}
+                            >
+                              <MessageCircle size={12} /> WA
+                            </button>
+                          )}
+
+                          {/* Email alert */}
                           {state === 'sending' ? (
                             <span style={{ color: '#888', fontSize: 12, fontFamily: '"JetBrains Mono", monospace', width: 100, textAlign: 'center' }}>SENDING...</span>
                           ) : state === 'sent' ? (
@@ -290,7 +330,7 @@ export default function AdminAlertsPage() {
                               className="btn-secondary"
                               style={{ padding: '5px 14px', fontSize: 11, minHeight: 32, width: 100, justifyContent: 'center' }}
                             >
-                              <Send size={11} /> SEND ALERT
+                              <Send size={11} /> EMAIL
                             </button>
                           )}
                         </div>
@@ -327,6 +367,7 @@ export default function AdminAlertsPage() {
                         )}
                       </div>
                       <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'flex-end' }}>
+                        {/* Renew */}
                         <button
                           onClick={() => handleRenew(m.user_id)}
                           disabled={renewingIds[m.user_id]}
@@ -341,6 +382,23 @@ export default function AdminAlertsPage() {
                           {renewingIds[m.user_id] ? '...' : 'RENEW'}
                         </button>
 
+                        {/* WhatsApp */}
+                        {whatsappIds[m.user_id] === 'sending' ? (
+                          <span style={{ fontSize: 10, color: '#888', minHeight: 28, display: 'flex', alignItems: 'center' }}>...</span>
+                        ) : whatsappIds[m.user_id] === 'sent' ? (
+                          <div style={{ minHeight: 28, display: 'flex', alignItems: 'center' }}><MessageCircle size={16} color="#25D366" /></div>
+                        ) : whatsappIds[m.user_id] === 'failed' ? (
+                          <div style={{ minHeight: 28, display: 'flex', alignItems: 'center' }}><AlertCircle size={16} color="#E8001D" /></div>
+                        ) : (
+                          <button
+                            onClick={() => handleWhatsapp(m.user_id)}
+                            style={{ padding: '4px 8px', fontSize: 10, minHeight: 28, background: 'transparent', color: '#25D366', border: '1px solid #0A3A1A', borderRadius: 3, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, fontWeight: 600 }}
+                          >
+                            <MessageCircle size={10} /> WA
+                          </button>
+                        )}
+
+                        {/* Email */}
                         {state === 'sending' ? (
                           <span style={{ fontSize: 11, color: '#888', minHeight: 28, display: 'flex', alignItems: 'center' }}>...</span>
                         ) : state === 'sent' ? (

@@ -11,9 +11,14 @@ class Settings(BaseSettings):
     GYM_NAME: str = "FitX Pro"
     ALGORITHM: str = "HS256"
     APP_ENV: str = "development"
-    # Gmail SMTP
+    # Gmail SMTP (Option B — sends from your Gmail directly)
+    # To get an App Password: Google Account → Security → 2-Step Verification → App Passwords
     GMAIL_USER: str = ""
     GMAIL_APP_PASSWORD: str = ""
+    # Twilio WhatsApp
+    TWILIO_ACCOUNT_SID: str = ""
+    TWILIO_AUTH_TOKEN: str = ""
+    TWILIO_WHATSAPP_FROM: str = "whatsapp:+14155238886"  # Twilio sandbox default
 
     class Config:
         env_file = ".env"

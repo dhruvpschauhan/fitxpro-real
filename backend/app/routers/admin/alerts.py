@@ -15,6 +15,7 @@ from app.routers.auth import get_current_user
 from app.config import settings
 from app.services.email_templates import get_email_template
 from app.services.email_service import send_email
+from app.services.whatsapp_service import send_whatsapp
 
 router = APIRouter(prefix="/admin/alerts", tags=["Admin Alerts"])
 
@@ -259,6 +260,78 @@ async def quick_renew_membership(
     db.add(new_m)
     await db.commit()
     return {"success": True, "new_end_date": end_date}
+
+@router.post("/whatsapp/{user_id}")
+async def send_whatsapp_alert(
+    user_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    current_admin: User = Depends(get_current_user)
+):
+    """Send a WhatsApp renewal reminder to a member via Twilio."""
+    if current_admin.role != "admin":
+        raise HTTPException(status_code=403, detail="Not authorized")
+
+    # Get latest membership
+    stmt = (
+        select(Membership)
+        .options(selectinload(Membership.user), selectinload(Membership.plan))
+        .where(Membership.user_id == user_id)
+        .order_by(Membership.end_date.desc())
+        .limit(1)
+    )
+    res = await db.execute(stmt)
+    m = res.scalar_one_or_none()
+
+    if not m:
+        raise HTTPException(status_code=404, detail="No membership found")
+
+    user = m.user
+    if not user.phone:
+        raise HTTPException(status_code=400, detail="Member has no phone number on file")
+
+    today = datetime.now(timezone.utc).date()
+    days_rem = (m.end_date - today).days
+    expiry_str = m.end_date.strftime("%d %B %Y")
+
+    if days_rem < 0:
+        msg = (
+            f"Hi {user.full_name} 👋\n\n"
+            f"Your *{m.plan.name}* membership at *FitX Pro* expired on *{expiry_str}*."
+            f" Renew now to keep your fitness streak going! 💪\n\n"
+            f"Visit us or contact reception to renew."
+        )
+    elif days_rem == 0:
+        msg = (
+            f"Hi {user.full_name} 👋\n\n"
+            f"Your *{m.plan.name}* membership at *FitX Pro* expires *TODAY*! ⚠️"
+            f" Renew before end of day to avoid any interruption.\n\n"
+            f"Visit us or contact reception to renew."
+        )
+    else:
+        msg = (
+            f"Hi {user.full_name} 👋\n\n"
+            f"Your *{m.plan.name}* membership at *FitX Pro* expires in *{days_rem} day{'s' if days_rem != 1 else ''}* on *{expiry_str}*. ⏳"
+            f"\n\nRenew early to avoid any break in your training! 💪\n\n"
+            f"Visit us or contact reception to renew."
+        )
+
+    result = send_whatsapp(to_phone=user.phone, body=msg)
+
+    # Log it
+    log = NotificationLog(
+        user_id=user.id,
+        trigger_reason="whatsapp_manual",
+        status="sent" if result["success"] else "failed",
+        recipient_email=user.phone,  # reusing field for phone
+        error_message=result.get("error"),
+        triggered_by=current_admin.id
+    )
+    db.add(log)
+    await db.commit()
+
+    if not result["success"]:
+        raise HTTPException(status_code=400, detail=result["error"])
+    return {"success": True, "sent_to": user.phone}
 
 @router.post("/send-all", response_model=SendAllResponse)
 async def send_manual_alerts_bulk(
