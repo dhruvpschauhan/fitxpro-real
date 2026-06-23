@@ -124,8 +124,16 @@ async def get_expiring_members(
     today = datetime.now(timezone.utc).date()
     target_date = today + timedelta(days=days)
 
+    # Only consider the absolute latest membership per user
+    subq = (
+        select(Membership.user_id, func.max(Membership.end_date).label("max_date"))
+        .group_by(Membership.user_id)
+        .subquery()
+    )
+
     stmt = (
         select(Membership)
+        .join(subq, and_(Membership.user_id == subq.c.user_id, Membership.end_date == subq.c.max_date))
         .options(selectinload(Membership.user), selectinload(Membership.plan))
         .where(
             and_(
@@ -167,8 +175,16 @@ async def get_expired_members(
 
     today = datetime.now(timezone.utc).date()
 
+    # Only consider the absolute latest membership per user
+    subq = (
+        select(Membership.user_id, func.max(Membership.end_date).label("max_date"))
+        .group_by(Membership.user_id)
+        .subquery()
+    )
+
     stmt = (
         select(Membership)
+        .join(subq, and_(Membership.user_id == subq.c.user_id, Membership.end_date == subq.c.max_date))
         .options(selectinload(Membership.user), selectinload(Membership.plan))
         .where(Membership.end_date <= today)
     )
@@ -230,6 +246,9 @@ async def quick_renew_membership(
 
     if not old_m:
         raise HTTPException(status_code=404, detail="No membership found to renew")
+
+    # Mark the old membership as expired so it's clean
+    old_m.status = "expired"
 
     today = datetime.now(timezone.utc).date()
     start_date = today if old_m.end_date < today else old_m.end_date
