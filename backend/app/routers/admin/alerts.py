@@ -7,6 +7,7 @@ from sqlalchemy import select, and_, func
 from sqlalchemy.orm import selectinload
 from pydantic import BaseModel
 import asyncio
+from asyncio import Semaphore
 
 from app.database import get_db
 from app.models import User, Membership
@@ -94,7 +95,7 @@ async def _send_whatsapp_alert(user_id: uuid.UUID, db: AsyncSession, admin_id: u
             f"Visit us or contact reception to renew."
         )
 
-    result = send_whatsapp(to_phone=user.phone, body=msg)
+    result = await send_whatsapp(to_phone=user.phone, body=msg)
 
     log = NotificationLog(
         user_id=user.id,
@@ -254,24 +255,31 @@ async def send_whatsapp_alerts_bulk(
     db: AsyncSession = Depends(get_db),
     current_admin: User = Depends(get_current_user)
 ):
-    """Send WhatsApp alerts to all provided user IDs."""
+    """Send WhatsApp alerts to all provided user IDs concurrently."""
     if current_admin.role != "admin":
         raise HTTPException(status_code=403, detail="Not authorized")
+
+    # Limit to 5 concurrent Twilio requests to respect rate limits
+    sem = Semaphore(5)
+
+    async def send_one(uid: uuid.UUID) -> dict:
+        async with sem:
+            return await _send_whatsapp_alert(uid, db, current_admin.id)
+
+    results = await asyncio.gather(*[send_one(uid) for uid in req.user_ids], return_exceptions=True)
 
     sent = 0
     failed = 0
     errors = []
-
-    for uid in req.user_ids:
-        result = await _send_whatsapp_alert(uid, db, current_admin.id)
-        if result["success"]:
+    for uid, result in zip(req.user_ids, results):
+        if isinstance(result, Exception):
+            failed += 1
+            errors.append({"user_id": str(uid), "error": str(result)})
+        elif result["success"]:
             sent += 1
         else:
             failed += 1
-            errors.append({"user_id": str(uid), "error": result["error"]})
-
-        # Small delay to respect Twilio rate limits
-        await asyncio.sleep(0.3)
+            errors.append({"user_id": str(uid), "error": result.get("error", "Unknown error")})
 
     return SendAllResponse(sent=sent, failed=failed, errors=errors)
 

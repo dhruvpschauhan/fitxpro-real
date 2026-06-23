@@ -1,20 +1,20 @@
 """
 WhatsApp service using Twilio's WhatsApp Business API.
-Uses httpx (already in requirements) for HTTP calls — works on all cloud platforms.
+Uses httpx.AsyncClient for non-blocking async HTTP — safe to use in FastAPI event loop.
 """
 import httpx
 from app.config import settings
 
 
-def send_whatsapp(to_phone: str, body: str) -> dict:
+async def send_whatsapp(to_phone: str, body: str) -> dict:
     """
-    Send a WhatsApp message via Twilio.
+    Send a WhatsApp message via Twilio (async).
     to_phone: E.164 format, e.g. '+919876543210'
     Returns {"success": True} or {"success": False, "error": str}
     """
     account_sid = settings.TWILIO_ACCOUNT_SID
     auth_token = settings.TWILIO_AUTH_TOKEN
-    from_number = settings.TWILIO_WHATSAPP_FROM  # e.g. 'whatsapp:+14155238886'
+    from_number = settings.TWILIO_WHATSAPP_FROM
 
     if not account_sid or not auth_token or not from_number:
         return {
@@ -25,14 +25,13 @@ def send_whatsapp(to_phone: str, body: str) -> dict:
     # Normalise the to number
     to_phone = to_phone.strip().replace(" ", "").replace("-", "")
     if not to_phone.startswith("+"):
-        # Assume Indian number if no country code
         to_phone = "+91" + to_phone.lstrip("0")
 
     url = f"https://api.twilio.com/2010-04-01/Accounts/{account_sid}/Messages.json"
 
     try:
-        with httpx.Client(timeout=15) as client:
-            resp = client.post(
+        async with httpx.AsyncClient(timeout=15) as client:
+            resp = await client.post(
                 url,
                 auth=(account_sid, auth_token),
                 data={
