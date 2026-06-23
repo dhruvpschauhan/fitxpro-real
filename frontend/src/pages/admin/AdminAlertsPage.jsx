@@ -1,6 +1,16 @@
-import { useState, useEffect } from 'react'
-import { Bell, ChevronDown, ChevronUp, CheckCircle2, AlertCircle, Users, MailCheck, MessageCircle, RefreshCw } from 'lucide-react'
+import { useState, useEffect, useCallback } from 'react'
+import { Bell, ChevronDown, ChevronUp, CheckCircle2, AlertCircle, Users, MessageCircle, RefreshCw } from 'lucide-react'
 import client from '../../api/client'
+
+function useWindowWidth() {
+  const [width, setWidth] = useState(window.innerWidth)
+  useEffect(() => {
+    const handler = () => setWidth(window.innerWidth)
+    window.addEventListener('resize', handler)
+    return () => window.removeEventListener('resize', handler)
+  }, [])
+  return width
+}
 
 export default function AdminAlertsPage() {
   const [activeTab, setActiveTab]   = useState('expiring')
@@ -14,6 +24,9 @@ export default function AdminAlertsPage() {
   const [logs,       setLogs]       = useState([])
   const [logsLoading, setLogsLoading] = useState(false)
   const [toast,      setToast]      = useState(null)
+
+  const windowWidth = useWindowWidth()
+  const isMobile = windowWidth < 768
 
   const showToast = (msg, type = 'success') => {
     setToast({ msg, type })
@@ -217,165 +230,132 @@ export default function AdminAlertsPage() {
             <Bell size={40} color="#1E1E1E" style={{ margin: '0 auto 16px' }} />
             <p style={{ color: '#555', fontSize: 14 }}>No members in this category.</p>
           </div>
-        ) : (
-          <>
-            {/* Desktop Table */}
-            <table className="table-grid hide-mobile">
-              <thead>
-                <tr>
-                  <th>MEMBER</th>
-                  <th>PHONE</th>
-                  <th>PLAN</th>
-                  <th>{activeTab === 'expiring' ? 'URGENCY' : 'EXPIRED ON'}</th>
-                  <th>LAST ALERTED</th>
-                  <th style={{ textAlign: 'right' }}>ACTIONS</th>
-                </tr>
-              </thead>
-              <tbody>
-                {members.map(m => {
-                  const { label, cls } = urgencyLabel(m.days_remaining)
-                  const waState = whatsappIds[m.user_id]
-                  return (
-                    <tr key={m.user_id}>
-                      <td>
-                        <div style={{ fontWeight: 600 }}>{m.full_name}</div>
-                        <div style={{ fontSize: 12, color: '#555', fontFamily: '"JetBrains Mono", monospace', marginTop: 2 }}>{m.email}</div>
-                      </td>
-                      <td style={{ color: '#888', fontSize: 12, fontFamily: '"JetBrains Mono", monospace' }}>
-                        {m.phone || <span style={{ color: '#333' }}>—</span>}
-                      </td>
-                      <td style={{ color: '#888', fontSize: 13 }}>{m.plan_name}</td>
-                      <td>
-                        {activeTab === 'expiring'
-                          ? <span className={cls}>{label}</span>
-                          : <span style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 12, color: '#E8001D' }}>
-                              {new Date(m.end_date + 'T00:00:00').toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }).toUpperCase()}
-                            </span>
-                        }
-                      </td>
-                      <td>
-                        {m.last_alerted_at ? (
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                            <MessageCircle size={13} color="#25D366" />
-                            <span style={{ fontSize: 12, color: '#888', fontFamily: '"JetBrains Mono", monospace' }}>{formatDate(m.last_alerted_at)}</span>
-                          </div>
-                        ) : (
-                          <span style={{ fontSize: 12, color: '#333' }}>— Never sent</span>
-                        )}
-                      </td>
-                      <td style={{ textAlign: 'right' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 8 }}>
-                          {/* Mark Renewed */}
-                          <button
-                            onClick={() => handleRenew(m.user_id)}
-                            disabled={renewingIds[m.user_id]}
-                            style={{
-                              padding: '5px 14px', fontSize: 11, minHeight: 32,
-                              background: 'transparent', color: '#22C55E',
-                              border: '1px solid #104A20', borderRadius: 3,
-                              cursor: renewingIds[m.user_id] ? 'not-allowed' : 'pointer',
-                              fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 5
-                            }}
-                          >
-                            <RefreshCw size={11} />
-                            {renewingIds[m.user_id] ? '...' : 'RENEW'}
-                          </button>
-
-                          {/* WhatsApp */}
-                          {waState === 'sending' ? (
-                            <span style={{ color: '#888', fontSize: 12, fontFamily: '"JetBrains Mono", monospace', width: 110, textAlign: 'center' }}>SENDING...</span>
-                          ) : waState === 'sent' ? (
-                            <span style={{ color: '#25D366', display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12, width: 110, justifyContent: 'center' }}><CheckCircle2 size={14} /> SENT</span>
-                          ) : waState === 'failed' ? (
-                            <span style={{ color: '#E8001D', display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12, width: 110, justifyContent: 'center' }}><AlertCircle size={14} /> FAILED</span>
-                          ) : (
-                            <button
-                              onClick={() => handleWhatsapp(m.user_id)}
-                              style={{
-                                padding: '5px 14px', fontSize: 11, minHeight: 32, width: 110, justifyContent: 'center',
-                                background: '#0A1F0F', color: '#25D366',
-                                border: '1px solid #0A3A1A', borderRadius: 3,
-                                cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 5,
-                                fontWeight: 600, transition: 'all 150ms ease'
-                              }}
-                            >
-                              <MessageCircle size={11} /> SEND WA
-                            </button>
-                          )}
+        ) : isMobile ? (
+          /* ── Mobile Cards ────────────────────────────────── */
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            {members.map((m, i) => {
+              const { label, cls } = urgencyLabel(m.days_remaining)
+              const waState = whatsappIds[m.user_id]
+              return (
+                <div key={m.user_id} style={{
+                  padding: '1rem',
+                  borderBottom: i < members.length - 1 ? '1px solid #1A1A1A' : 'none',
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontWeight: 600, fontSize: 14, color: '#F0F0F0' }}>{m.full_name}</div>
+                      <div style={{ fontSize: 11, color: '#666', fontFamily: '"JetBrains Mono", monospace', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.phone || m.email}</div>
+                      <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                        <span className={cls}>{label}</span>
+                        <span style={{ fontSize: 11, color: '#555' }}>{m.plan_name}</span>
+                      </div>
+                      {m.last_alerted_at && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 6 }}>
+                          <MessageCircle size={11} color="#25D366" />
+                          <span style={{ fontSize: 11, color: '#555', fontFamily: '"JetBrains Mono", monospace' }}>{formatDate(m.last_alerted_at)}</span>
                         </div>
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-
-            {/* Mobile Cards */}
-            <div className="show-mobile mobile-cards">
-              {members.map((m, i) => {
+                      )}
+                    </div>
+                    <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'flex-end' }}>
+                      <button
+                        onClick={() => handleRenew(m.user_id)}
+                        disabled={renewingIds[m.user_id]}
+                        style={{ padding: '4px 10px', fontSize: 10, minHeight: 28, background: 'transparent', color: '#22C55E', border: '1px solid #104A20', borderRadius: 3, cursor: renewingIds[m.user_id] ? 'not-allowed' : 'pointer', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4 }}
+                      >
+                        <RefreshCw size={9} />{renewingIds[m.user_id] ? '...' : 'RENEW'}
+                      </button>
+                      {waState === 'sending' ? (
+                        <span style={{ fontSize: 10, color: '#888', minHeight: 28, display: 'flex', alignItems: 'center' }}>...</span>
+                      ) : waState === 'sent' ? (
+                        <div style={{ minHeight: 28, display: 'flex', alignItems: 'center' }}><CheckCircle2 size={18} color="#25D366" /></div>
+                      ) : waState === 'failed' ? (
+                        <div style={{ minHeight: 28, display: 'flex', alignItems: 'center' }}><AlertCircle size={18} color="#E8001D" /></div>
+                      ) : (
+                        <button onClick={() => handleWhatsapp(m.user_id)} style={{ padding: '4px 10px', fontSize: 10, minHeight: 28, background: '#0A1F0F', color: '#25D366', border: '1px solid #0A3A1A', borderRadius: 3, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, fontWeight: 600 }}>
+                          <MessageCircle size={10} /> WA
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        ) : (
+          /* ── Desktop Table ───────────────────────────────── */
+          <table className="table-grid">
+            <thead>
+              <tr>
+                <th>MEMBER</th>
+                <th>PHONE</th>
+                <th>PLAN</th>
+                <th>{activeTab === 'expiring' ? 'URGENCY' : 'EXPIRED ON'}</th>
+                <th>LAST ALERTED</th>
+                <th style={{ textAlign: 'right' }}>ACTIONS</th>
+              </tr>
+            </thead>
+            <tbody>
+              {members.map(m => {
                 const { label, cls } = urgencyLabel(m.days_remaining)
                 const waState = whatsappIds[m.user_id]
                 return (
-                  <div key={m.user_id} style={{
-                    padding: '1rem',
-                    borderBottom: i < members.length - 1 ? '1px solid #1A1A1A' : 'none',
-                  }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontWeight: 600, fontSize: 14, color: '#F0F0F0' }}>{m.full_name}</div>
-                        <div style={{ fontSize: 11, color: '#666', fontFamily: '"JetBrains Mono", monospace', marginTop: 2 }}>{m.phone || m.email}</div>
-                        <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                          <span className={cls}>{label}</span>
-                          <span style={{ fontSize: 11, color: '#555' }}>{m.plan_name}</span>
+                  <tr key={m.user_id}>
+                    <td>
+                      <div style={{ fontWeight: 600 }}>{m.full_name}</div>
+                      <div style={{ fontSize: 12, color: '#555', fontFamily: '"JetBrains Mono", monospace', marginTop: 2 }}>{m.email}</div>
+                    </td>
+                    <td style={{ color: '#888', fontSize: 12, fontFamily: '"JetBrains Mono", monospace' }}>
+                      {m.phone || <span style={{ color: '#333' }}>—</span>}
+                    </td>
+                    <td style={{ color: '#888', fontSize: 13 }}>{m.plan_name}</td>
+                    <td>
+                      {activeTab === 'expiring'
+                        ? <span className={cls}>{label}</span>
+                        : <span style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 12, color: '#E8001D' }}>
+                            {new Date(m.end_date + 'T00:00:00').toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }).toUpperCase()}
+                          </span>
+                      }
+                    </td>
+                    <td>
+                      {m.last_alerted_at ? (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <MessageCircle size={13} color="#25D366" />
+                          <span style={{ fontSize: 12, color: '#888', fontFamily: '"JetBrains Mono", monospace' }}>{formatDate(m.last_alerted_at)}</span>
                         </div>
-                        {m.last_alerted_at && (
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 6 }}>
-                            <MessageCircle size={11} color="#25D366" />
-                            <span style={{ fontSize: 11, color: '#555', fontFamily: '"JetBrains Mono", monospace' }}>{formatDate(m.last_alerted_at)}</span>
-                          </div>
-                        )}
-                      </div>
-                      <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'flex-end' }}>
-                        {/* Renew */}
+                      ) : (
+                        <span style={{ fontSize: 12, color: '#333' }}>— Never sent</span>
+                      )}
+                    </td>
+                    <td style={{ textAlign: 'right' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 8 }}>
                         <button
                           onClick={() => handleRenew(m.user_id)}
                           disabled={renewingIds[m.user_id]}
-                          style={{
-                            padding: '4px 10px', fontSize: 10, minHeight: 28,
-                            background: 'transparent', color: '#22C55E',
-                            border: '1px solid #104A20', borderRadius: 3,
-                            cursor: renewingIds[m.user_id] ? 'not-allowed' : 'pointer',
-                            fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4
-                          }}
+                          style={{ padding: '5px 14px', fontSize: 11, minHeight: 32, background: 'transparent', color: '#22C55E', border: '1px solid #104A20', borderRadius: 3, cursor: renewingIds[m.user_id] ? 'not-allowed' : 'pointer', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 5 }}
                         >
-                          <RefreshCw size={9} />
-                          {renewingIds[m.user_id] ? '...' : 'RENEW'}
+                          <RefreshCw size={11} />{renewingIds[m.user_id] ? '...' : 'RENEW'}
                         </button>
-
-                        {/* WhatsApp */}
                         {waState === 'sending' ? (
-                          <span style={{ fontSize: 10, color: '#888', minHeight: 28, display: 'flex', alignItems: 'center' }}>...</span>
+                          <span style={{ color: '#888', fontSize: 12, fontFamily: '"JetBrains Mono", monospace', width: 110, textAlign: 'center' }}>SENDING...</span>
                         ) : waState === 'sent' ? (
-                          <div style={{ minHeight: 28, display: 'flex', alignItems: 'center' }}><CheckCircle2 size={18} color="#25D366" /></div>
+                          <span style={{ color: '#25D366', display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12, width: 110, justifyContent: 'center' }}><CheckCircle2 size={14} /> SENT</span>
                         ) : waState === 'failed' ? (
-                          <div style={{ minHeight: 28, display: 'flex', alignItems: 'center' }}><AlertCircle size={18} color="#E8001D" /></div>
+                          <span style={{ color: '#E8001D', display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12, width: 110, justifyContent: 'center' }}><AlertCircle size={14} /> FAILED</span>
                         ) : (
-                          <button
-                            onClick={() => handleWhatsapp(m.user_id)}
-                            style={{ padding: '4px 10px', fontSize: 10, minHeight: 28, background: '#0A1F0F', color: '#25D366', border: '1px solid #0A3A1A', borderRadius: 3, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, fontWeight: 600 }}
-                          >
-                            <MessageCircle size={10} /> WA
+                          <button onClick={() => handleWhatsapp(m.user_id)} style={{ padding: '5px 14px', fontSize: 11, minHeight: 32, width: 110, justifyContent: 'center', background: '#0A1F0F', color: '#25D366', border: '1px solid #0A3A1A', borderRadius: 3, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 5, fontWeight: 600, transition: 'all 150ms ease' }}>
+                            <MessageCircle size={11} /> SEND WA
                           </button>
                         )}
                       </div>
-                    </div>
-                  </div>
+                    </td>
+                  </tr>
                 )
               })}
-            </div>
-          </>
+            </tbody>
+          </table>
         )}
       </div>
+
 
       {/* Alert History */}
       <div style={{ marginTop: '2.5rem' }}>
