@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
@@ -11,6 +11,7 @@ from passlib.context import CryptContext
 from app.database import get_db
 from app.models import User
 from app.config import settings
+from app.limiter import limiter
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -63,7 +64,8 @@ async def require_admin(current_user: User = Depends(get_current_user)):
     return current_user
 
 @router.post("/login", response_model=Token)
-async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = Depends(get_db)):
+@limiter.limit("5/minute")
+async def login_for_access_token(request: Request, form_data: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(User).where(User.username == form_data.username))
     user = result.scalars().first()
     if not user or not verify_password(form_data.password, user.password_hash):

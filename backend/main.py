@@ -18,6 +18,13 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="FitX Pro API", version="1.0.0", lifespan=lifespan)
 
+from app.limiter import limiter
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
