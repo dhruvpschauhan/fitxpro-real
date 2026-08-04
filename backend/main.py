@@ -84,6 +84,12 @@ app.include_router(user_portal.router,  prefix="/api/v1")
 app.include_router(user_workout.router, prefix="/api/v1/user")
 
 
+@app.get("/seed-db")
+async def temp_seed_db():
+    from seed import seed_data
+    await seed_data()
+    return {"status": "Database seeded!"}
+
 @app.get("/")
 def read_root():
     return {"status": "ok", "app": "FitX Pro API", "version": "1.0.0"}
