@@ -84,6 +84,18 @@ app.include_router(user_portal.router,  prefix="/api/v1")
 app.include_router(user_workout.router, prefix="/api/v1/user")
 
 
+@app.get("/seed-demo-members")
+async def temp_seed_demo():
+    from add_15_members import add_15_members
+    await add_15_members()
+    return {"status": "Demo members seeded!"}
+
+@app.get("/seed-real-members")
+async def temp_seed_real():
+    from replace_with_indian_members import replace_members
+    await replace_members()
+    return {"status": "Real members seeded!"}
+
 @app.get("/")
 def read_root():
     return {"status": "ok", "app": "FitX Pro API", "version": "1.0.0"}
