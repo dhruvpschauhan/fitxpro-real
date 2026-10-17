@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FitX Pro - Interactive Architecture & Workflow Guide</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #080808;
+      color: #F0F0F0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+      padding: 0;
+    }
+    header {
+      background: #111;
+      border-bottom: 1px solid #242424;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .brand h1 {
+      font-size: 24px;
+      font-weight: 900;
+      color: #E8001D;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .badge {
+      background: #E8001D22;
+      color: #E8001D;
+      border: 1px solid #E8001D55;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
+    }
+    .tabs {
+      display: flex;
+      gap: 0.4rem;
+      background: #080808;
+      padding: 4px;
+      border-radius: 6px;
+      border: 1px solid #242424;
+    }
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: #888;
+      padding: 0.45rem 0.9rem;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .tab-btn.active {
+      background: #E8001D;
+      color: #FFF;
+    }
+    main {
+      max-width: 1280px;
+      margin: 1.5rem auto;
+      padding: 0 1.5rem;
+    }
+    .card {
+      background: #111;
+      border: 1px solid #242424;
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .workflow-nav {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .wf-card {
+      background: #111;
+      border: 1px solid #242424;
+      border-radius: 8px;
+      padding: 1rem;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .wf-card:hover {
+      border-color: #444;
+    }
+    .wf-card.active {
+      background: #171112;
+      border-color: #E8001D;
+    }
+    .step-timeline {
+      display: flex;
+      gap: 0.5rem;
+      margin: 1rem 0;
+      overflow-x: auto;
+    }
+    .step-pill {
+      flex: 1;
+      min-width: 120px;
+      background: #0A0A0A;
+      border: 1px solid #242424;
+      border-radius: 6px;
+      padding: 0.6rem;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .step-pill.active {
+      background: #1F1214;
+      border-color: #E8001D;
+    }
+    pre {
+      background: #080808;
+      border: 1px solid #242424;
+      border-radius: 6px;
+      padding: 1rem;
+      font-family: "JetBrains Mono", Consolas, monospace;
+      font-size: 13px;
+      color: #DDD;
+      overflow-x: auto;
+      line-height: 1.5;
+      margin: 1rem 0;
+    }
+    .pro-tip {
+      background: #17130B;
+      border: 1px solid #D9770644;
+      border-radius: 6px;
+      padding: 0.85rem 1rem;
+      color: #FDE68A;
+      font-size: 13px;
+      margin-top: 1rem;
+    }
+    .file-path {
+      display: inline-block;
+      font-family: "JetBrains Mono", Consolas, monospace;
+      font-size: 12px;
+      color: #38BDF8;
+      background: #080808;
+      border: 1px solid #242424;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-top: 4px;
+    }
+    .layer-card {
+      background: #111;
+      border: 1px solid #242424;
+      border-radius: 8px;
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+    }
+    .layer-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid #1E1E1E;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <h1>FITX PRO</h1>
+      <span class="badge">Standalone Architecture & Learning Hub</span>
+    </div>
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('workflows')">Interactive Workflows</button>
+      <button class="tab-btn" onclick="switchTab('architecture')">System Layers</button>
+      <button class="tab-btn" onclick="switchTab('files')">File Connections</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- TAB 1: WORKFLOWS -->
+    <div id="tab-workflows">
+      <div class="workflow-nav">
+        <div class="wf-card active" onclick="selectWf(0)">
+          <div class="badge">Security & State</div>
+          <h3 style="margin-top: 6px; font-size: 16px;">1. Auth & JWT Lifecycle</h3>
+          <p style="font-size: 12px; color: #888; margin-top: 4px;">Login form to Bcrypt, JWT creation, and auto-bearer headers.</p>
+        </div>
+        <div class="wf-card" onclick="selectWf(1)">
+          <div class="badge">Background Jobs</div>
+          <h3 style="margin-top: 6px; font-size: 16px;">2. Expiry Email Scheduler</h3>
+          <p style="font-size: 12px; color: #888; margin-top: 4px;">APScheduler cron alerts at 7, 3, 1, 0 days via Resend API.</p>
+        </div>
+        <div class="wf-card" onclick="selectWf(2)">
+          <div class="badge">Core Logic</div>
+          <h3 style="margin-top: 6px; font-size: 16px;">3. Workout Programs to Daily Routine</h3>
+          <p style="font-size: 12px; color: #888; margin-top: 4px;">Admin routine builder to member dynamic today's workout.</p>
+        </div>
+        <div class="wf-card" onclick="selectWf(3)">
+          <div class="badge">Health Engine</div>
+          <h3 style="margin-top: 6px; font-size: 16px;">4. Nutrition & Macro Target Engine</h3>
+          <p style="font-size: 12px; color: #888; margin-top: 4px;">Mifflin-St Jeor metabolic calculation and food logging.</p>
+        </div>
+      </div>
+
+      <div class="card" id="wf-detail">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+
+    <!-- TAB 2: ARCHITECTURE -->
+    <div id="tab-architecture" style="display: none;">
+      <h2 style="font-size: 22px; margin-bottom: 1rem; text-transform: uppercase;">System Topology Layers</h2>
+
+      <div class="layer-card">
+        <div class="layer-header">
+          <h3 style="color: #3B82F6;">1. Frontend Client Layer</h3>
+          <span class="badge" style="color: #3B82F6; border-color: #3B82F655; background: #3B82F611;">React 19 + Vite</span>
+        </div>
+        <p style="color: #AAA;">Runs on <code>http://localhost:5173</code>. Manages the visual SPA using React Router v7, Zustand (persistent auth), and Axios with automatic JWT injection.</p>
+      </div>
+
+      <div class="layer-card">
+        <div class="layer-header">
+          <h3 style="color: #10B981;">2. Gateway & Middleware Layer</h3>
+          <span class="badge" style="color: #10B981; border-color: #10B98155; background: #10B98111;">FastAPI + Starlette</span>
+        </div>
+        <p style="color: #AAA;">Runs on <code>http://localhost:8000</code>. Manages CORS, SlowAPI rate limiting (5 req/min on login), global error formatting, and app lifespan events.</p>
+      </div>
+
+      <div class="layer-card">
+        <div class="layer-header">
+          <h3 style="color: #E8001D;">3. Routers & Security Layer</h3>
+          <span class="badge" style="color: #E8001D; border-color: #E8001D55; background: #E8001D11;">OAuth2 + JWT</span>
+        </div>
+        <p style="color: #AAA;">Distributes endpoints across Universal (<code>/api/v1/auth</code>), Admin (<code>/api/v1/admin/*</code> with <code>require_admin</code>), Member Portal (<code>/api/v1/user/*</code> with <code>get_current_user</code>), and Shared.</p>
+      </div>
+
+      <div class="layer-card">
+        <div class="layer-header">
+          <h3 style="color: #F59E0B;">4. Data & Persistence Layer</h3>
+          <span class="badge" style="color: #F59E0B; border-color: #F59E0B55; background: #F59E0B11;">SQLAlchemy Async + SQLite / PostgreSQL</span>
+        </div>
+        <p style="color: #AAA;">Relational models with UUID primary keys (preventing enumeration attacks). Uses <code>selectinload</code> for eager loading relationships without N+1 query overhead.</p>
+      </div>
+
+      <div class="layer-card">
+        <div class="layer-header">
+          <h3 style="color: #8B5CF6;">5. Background Scheduler & External Services</h3>
+          <span class="badge" style="color: #8B5CF6; border-color: #8B5CF655; background: #8B5CF611;">APScheduler + Resend API</span>
+        </div>
+        <p style="color: #AAA;">AsyncIOScheduler runs inside the Python event loop without blocking HTTP requests. Evaluates expiring memberships and sends transactional emails with idempotency logging.</p>
+      </div>
+    </div>
+
+    <!-- TAB 3: FILES -->
+    <div id="tab-files" style="display: none;">
+      <h2 style="font-size: 22px; margin-bottom: 1rem; text-transform: uppercase;">Key File Connections</h2>
+
+      <div class="card">
+        <h3 style="color: #38BDF8; font-family: monospace;">backend/main.py</h3>
+        <p style="margin-top: 4px; color: #BBB;">The central entry point. Configures CORS, initializes SlowAPI rate limiter, starts APScheduler in the lifespan context manager, and registers all API routers.</p>
+      </div>
+
+      <div class="card">
+        <h3 style="color: #38BDF8; font-family: monospace;">backend/app/limiter.py</h3>
+        <p style="margin-top: 4px; color: #BBB;">Creates the singleton <code>Limiter(key_func=get_remote_address)</code>. Extracts client IP from incoming requests to prevent credential-stuffing attacks.</p>
+      </div>
+
+      <div class="card">
+        <h3 style="color: #38BDF8; font-family: monospace;">backend/app/scheduler.py & app/jobs/expiry_checker.py</h3>
+        <p style="margin-top: 4px; color: #BBB;">Manages daily background tasks. Evaluates memberships at 7, 3, 1, and 0 days, checks <code>notification_logs</code> to avoid sending duplicate emails, and calls Resend.</p>
+      </div>
+
+      <div class="card">
+        <h3 style="color: #38BDF8; font-family: monospace;">frontend/src/api/client.js</h3>
+        <p style="margin-top: 4px; color: #BBB;">Axios singleton. Attaches <code>Authorization: Bearer &lt;token&gt;</code> automatically to every outgoing request and handles 401 errors with redirect to <code>/login</code>.</p>
+      </div>
+
+      <div class="card">
+        <h3 style="color: #38BDF8; font-family: monospace;">frontend/src/store/authStore.js</h3>
+        <p style="margin-top: 4px; color: #BBB;">Zustand state store with <code>persist</code> middleware. Stores user role, username, and token, keeping the user logged in across page reloads.</p>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const workflows = [
+      {
+        title: "1. Authentication & JWT Token Lifecycle",
+        steps: [
+          {
+            title: "User submits credentials",
+            file: "frontend/src/pages/Login.jsx",
+            actor: "Client UI",
+            desc: "The user submits their username and password. The handleSubmit event invokes login() from the auth store.",
+            code: "const role = await login(username, password);\nnavigate(role === 'admin' ? '/admin' : '/app');",
+            tip: "Clean separation: Login.jsx handles UI presentation, while authStore handles network calls."
+          },
+          {
+            title: "Zustand dispatches URL-encoded POST",
+            file: "frontend/src/store/authStore.js",
+            actor: "Client State",
+            desc: "The credentials are serialized into form-data and sent to /api/v1/auth/login via axios client.",
+            code: "const formData = new URLSearchParams();\nformData.append('username', username);\nformData.append('password', password);\nconst res = await api.post('/auth/login', formData);",
+            tip: "FastAPI's OAuth2PasswordRequestForm expects application/x-www-form-urlencoded format."
+          },
+          {
+            title: "Rate Limiter checks client IP",
+            file: "backend/app/routers/auth.py",
+            actor: "Backend Middleware",
+            desc: "SlowAPI intercepts the request and verifies the client IP has not exceeded 5 requests in the last minute.",
+            code: "@router.post('/login')\n@limiter.limit('5/minute')\nasync def login_for_access_token(request: Request, ...):",
+            tip: "request: Request is required so slowapi can read the IP or X-Forwarded-For header."
+          },
+          {
+            title: "Password verified & JWT returned",
+            file: "backend/app/routers/auth.py",
+            actor: "Database & Security",
+            desc: "Bcrypt validates the hashed password. A token is created signed with HS256 containing sub and role.",
+            code: "access_token = create_access_token(data={'sub': user.username, 'role': user.role})\nreturn {'access_token': access_token, 'token_type': 'bearer'}",
+            tip: "The JWT is stateless: subsequent requests are verified cryptographically without querying the database for the user role."
+          }
+        ]
+      },
+      {
+        title: "2. Membership Expiry & Background Email Scheduler",
+        steps: [
+          {
+            title: "APScheduler starts on FastAPI Lifespan",
+            file: "backend/main.py & app/scheduler.py",
+            actor: "Asyncio Scheduler",
+            desc: "When FastAPI boots, lifespan starts AsyncIOScheduler to run daily cron jobs without blocking HTTP calls.",
+            code: "start_scheduler() # Adds cron jobs: 00:00 midnight for expiry, 08:00 for emails",
+            tip: "AsyncIOScheduler runs natively in Python asyncio event loop."
+          },
+          {
+            title: "Querying expiring memberships",
+            file: "backend/app/jobs/expiry_checker.py",
+            actor: "SQLAlchemy Async",
+            desc: "The job checks target dates for 7, 3, 1, and 0 days until end_date using selectinload to eagerly fetch user & plan.",
+            code: "stmt = select(Membership).options(selectinload(Membership.user)).where(Membership.end_date == target_date)",
+            tip: "selectinload eliminates N+1 query performance problems."
+          },
+          {
+            title: "Deduplication via NotificationLog",
+            file: "backend/app/jobs/expiry_checker.py",
+            actor: "Audit Log Guard",
+            desc: "Checks notification_logs to see if the user was already sent an alert today for this trigger reason.",
+            code: "already_sent = await check_notification_log(db, user.id, trigger, today)\nif already_sent: continue",
+            tip: "Guarantees idempotency even if the server is restarted multiple times in a single day."
+          },
+          {
+            title: "Dispatch via Resend API",
+            file: "backend/app/jobs/expiry_checker.py",
+            actor: "Email Service",
+            desc: "Renders HTML template and sends through Resend REST API, then records an audit log.",
+            code: "resend.Emails.send({'from': settings.EMAIL_FROM, 'to': [user.email], 'html': html})\nawait log_notification(db, user.id, trigger, user.email, 'sent')",
+            tip: "Logs failures with error messages for easy admin diagnostics."
+          }
+        ]
+      },
+      {
+        title: "3. Workout Programs to Daily Routine",
+        steps: [
+          {
+            title: "Admin builds multi-day program",
+            file: "frontend/src/pages/admin/WorkoutBuilder.jsx",
+            actor: "Admin UI",
+            desc: "Admin constructs days and exercises with sets, reps, and rest timers.",
+            code: "await api.post('/admin/workout-programs', { name, days: [{ day_label: 'Day 1', exercises: [...] }] })",
+            tip: "Sends a single nested JSON payload."
+          },
+          {
+            title: "Relational persistence with cascading",
+            file: "backend/app/routers/admin/workout_programs.py",
+            actor: "Database Layer",
+            desc: "Nested Pydantic models validate the structure; SQLAlchemy inserts Program -> Days -> Exercises.",
+            code: "prog = WorkoutProgram(name=body.name)\ndb.add(prog); await db.flush()\n# Add child WorkoutDay and Exercise rows",
+            tip: "Foreign key cascading automatically manages child rows upon deletion."
+          },
+          {
+            title: "Member selects active program",
+            file: "backend/app/routers/user/workout.py",
+            actor: "Member Portal",
+            desc: "Member clicks select; backend records UserProgramSelection with selected_at timestamp.",
+            code: "selection = UserProgramSelection(user_id=user.id, program_id=id, selected_at=func.now())",
+            tip: "Timestamp is used for dynamic day calculation."
+          },
+          {
+            title: "Dynamic daily workout calculation",
+            file: "backend/app/routers/user/workout.py",
+            actor: "Calculation Engine",
+            desc: "Modulo arithmetic determines the current day of the training program.",
+            code: "days_elapsed = (date.today() - selection.selected_at.date()).days\nday_index = days_elapsed % len(program.days)",
+            tip: "Provides an infinite rotating cycle without requiring manual calendar scheduling."
+          }
+        ]
+      },
+      {
+        title: "4. Nutrition & Dynamic Macro Engine",
+        steps: [
+          {
+            title: "Member inputs biometrics",
+            file: "frontend/src/pages/member/MemberNutrition.jsx",
+            actor: "Client UI",
+            desc: "Member saves age, gender, height, weight, activity level, and fitness goals.",
+            code: "await api.put('/user/fitness-profile', { weight_kg: 75, height_cm: 180, age: 24, activity_level: 'moderate' })",
+            tip: "Separated into user_profiles table to keep the main user credentials table compact."
+          },
+          {
+            title: "Mifflin-St Jeor metabolic calculation",
+            file: "frontend/src/pages/member/MemberNutrition.jsx",
+            actor: "Sports Nutrition Math",
+            desc: "Computes Basal Metabolic Rate and multiplies by activity factor (TDEE).",
+            code: "const bmr = 10 * weight + 6.25 * height - 5 * age + (gender === 'male' ? 5 : -161);\nconst tdee = bmr * 1.55;",
+            tip: "Target macros: 2g protein per kg of bodyweight, 25% healthy fats, remaining calories in carbs."
+          },
+          {
+            title: "Daily food logging & real-time progress",
+            file: "frontend/src/pages/member/MemberNutrition.jsx",
+            actor: "State & Storage",
+            desc: "Foods logged today are summed against dynamic macro targets with visual progress gauges.",
+            code: "const consumed = logs.reduce((acc, f) => ({ calories: acc.calories + f.calories, ... }), { calories: 0 })",
+            tip: "Gives members immediate feedback on caloric surplus/deficit."
+          }
+        ]
+      }
+    ];
+
+    let currentWfIdx = 0;
+    let currentStepIdx = 0;
+
+    function renderDetail() {
+      const wf = workflows[currentWfIdx];
+      const step = wf.steps[currentStepIdx];
+      const container = document.getElementById('wf-detail');
+
+      let pillsHtml = '';
+      wf.steps.forEach((s, idx) => {
+        pillsHtml += `
+          <div class="step-pill ${idx === currentStepIdx ? 'active' : ''}" onclick="selectStep(${idx})">
+            <div style="font-size: 11px; font-weight: 700; color: ${idx === currentStepIdx ? '#E8001D' : '#888'};">STEP ${idx + 1}</div>
+            <div style="font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${s.title}</div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+          <div>
+            <span class="badge">STEP ${currentStepIdx + 1} OF ${wf.steps.length}</span>
+            <h2 style="font-size: 22px; text-transform: uppercase; margin-top: 4px;">${step.title}</h2>
+            <div class="file-path">${step.file}</div>
+          </div>
+          <div>
+            <button class="tab-btn" style="border: 1px solid #333;" onclick="prevStep()" ${currentStepIdx === 0 ? 'disabled' : ''}>← Previous</button>
+            <button class="tab-btn" style="background: #E8001D; color: #FFF;" onclick="nextStep()" ${currentStepIdx === wf.steps.length - 1 ? 'disabled' : ''}>Next →</button>
+          </div>
+        </div>
+
+        <div class="step-timeline">${pillsHtml}</div>
+
+        <p style="color: #CCC; margin: 1rem 0; font-size: 14px;">${step.desc}</p>
+        <pre><code>${step.code}</code></pre>
+        <div class="pro-tip">💡 <strong>Architectural Insight:</strong> ${step.tip}</div>
+      `;
+    }
+
+    function selectWf(idx) {
+      currentWfIdx = idx;
+      currentStepIdx = 0;
+      document.querySelectorAll('.wf-card').forEach((c, i) => {
+        c.classList.toggle('active', i === idx);
+      });
+      renderDetail();
+    }
+
+    function selectStep(idx) {
+      currentStepIdx = idx;
+      renderDetail();
+    }
+
+    function prevStep() {
+      if (currentStepIdx > 0) {
+        currentStepIdx--;
+        renderDetail();
+      }
+    }
+
+    function nextStep() {
+      if (currentStepIdx < workflows[currentWfIdx].steps.length - 1) {
+        currentStepIdx++;
+        renderDetail();
+      }
+    }
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+      document.getElementById('tab-workflows').style.display = tabId === 'workflows' ? 'block' : 'none';
+      document.getElementById('tab-architecture').style.display = tabId === 'architecture' ? 'block' : 'none';
+      document.getElementById('tab-files').style.display = tabId === 'files' ? 'block' : 'none';
+    }
+
+    // Init
+    renderDetail();
+  </script>
+</body>
+</html>

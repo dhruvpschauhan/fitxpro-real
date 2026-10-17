@@ -12,7 +12,7 @@ from app.routers.auth import require_admin
 
 router = APIRouter(prefix="/memberships", tags=["admin-memberships"])
 
-
+#membership plans
 class PlanOut(BaseModel):
     id: uuid.UUID
     name: str
@@ -33,7 +33,7 @@ class AssignMembership(BaseModel):
     payment_mode: str = "cash"
     notes: str | None = None
 
-
+#specified plan for a member
 class MembershipOut(BaseModel):
     id: uuid.UUID
     user_id: uuid.UUID
@@ -78,6 +78,7 @@ async def assign_membership(
 
     end_date = body.start_date + timedelta(days=plan.duration_days)
 
+    #create the sqlalchemy record for the specific member
     m = Membership(
         user_id=body.user_id,
         plan_id=body.plan_id,

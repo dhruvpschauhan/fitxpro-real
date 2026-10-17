@@ -1,1 +1,4 @@
 fitx_pro/
+__pycache__/
+*.py[cod]
+*.log

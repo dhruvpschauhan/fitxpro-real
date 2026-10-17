@@ -29,6 +29,9 @@ import MemberNutrition from './pages/member/MemberNutrition'
 import BodyMetrics from './pages/member/BodyMetrics'
 import MemberProfile from './pages/member/MemberProfile'
 
+// Learning & Architecture Explorer
+import ArchitectureWorkflow from './learning/ArchitectureWorkflow'
+
 function ProtectedRoute({ children, role }) {
   const { isAuthenticated, user } = useAuthStore()
   if (!isAuthenticated) return <Navigate to="/login" replace />
@@ -47,6 +50,9 @@ function App() {
     <Router>
       <Routes>
         <Route path="/login" element={<Login />} />
+        <Route path="/learning" element={<ArchitectureWorkflow />} />
+        <Route path="/workflow" element={<Navigate to="/learning" replace />} />
+        <Route path="/architecture" element={<Navigate to="/learning" replace />} />
         <Route path="/" element={<RoleRedirect />} />
 
         {/* ── Admin Portal ── */}
