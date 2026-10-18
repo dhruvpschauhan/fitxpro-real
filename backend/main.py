@@ -2,20 +2,13 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-import logging
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 from app.scheduler import start_scheduler, stop_scheduler
-from app.database import engine, _db_url
+from app.database import engine
 from app.models import Base
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Mask password for safe logging — shows host so we can diagnose connection issues
-    safe_url = _db_url.split("@")[-1] if "@" in _db_url else _db_url
-    logger.info(f"[Startup] Connecting to database host: {safe_url}")
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     start_scheduler()
