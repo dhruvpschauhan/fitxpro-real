@@ -1,4 +1,33 @@
-fitx_pro/
+# Python
 __pycache__/
 *.py[cod]
+*.pyo
+*.pyd
+*.egg
+*.egg-info/
+dist/
+build/
+
+# Virtual environments
+venv/
+.venv/
+env/
+.env.local
+
+# Secrets & environment variables — NEVER commit these!
+.env
+
+# Logs
 *.log
+
+# SQLite databases (local dev only)
+*.db
+*.sqlite
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
