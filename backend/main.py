@@ -84,6 +84,12 @@ app.include_router(user_portal.router,  prefix="/api/v1")
 app.include_router(user_workout.router, prefix="/api/v1/user")
 
 
+@app.get("/seed-full")
+async def temp_seed_full():
+    from restore_from_sqlite import run_sqlite_restore
+    result = await run_sqlite_restore()
+    return result
+
 @app.get("/seed-base")
 async def temp_seed_base():
     from seed import seed_data
