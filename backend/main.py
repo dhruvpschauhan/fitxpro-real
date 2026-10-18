@@ -84,6 +84,12 @@ app.include_router(user_portal.router,  prefix="/api/v1")
 app.include_router(user_workout.router, prefix="/api/v1/user")
 
 
+@app.get("/seed-base")
+async def temp_seed_base():
+    from seed import seed_data
+    await seed_data()
+    return {"status": "Base data seeded (admin, plans, workout program)!"}
+
 @app.get("/seed-demo-members")
 async def temp_seed_demo():
     from add_15_members import add_15_members
