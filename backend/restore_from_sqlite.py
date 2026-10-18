@@ -40,6 +40,9 @@ def clean_value(val, col_name):
                 return datetime.strptime(clean_str, '%Y-%m-%d %H:%M:%S')
             except ValueError:
                 return val
+    # Convert numbers to string for string columns like sets, reps, phone
+    if col_name in ('sets', 'reps', 'phone') and val is not None:
+        return str(val)
     return val
 
 MODEL_TABLES = [
