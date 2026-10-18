@@ -86,6 +86,15 @@ async def run_sqlite_restore(session: AsyncSession = None, sqlite_path: str = No
     summary = {}
     total_count = 0
 
+    from sqlalchemy import text
+
+    # Ensure profile_photo column on PostgreSQL is TEXT (unlimited length for large base64 photos)
+    try:
+        await session.execute(text("ALTER TABLE users ALTER COLUMN profile_photo TYPE TEXT;"))
+        await session.commit()
+    except Exception:
+        await session.rollback()
+
     try:
         for table_name, model_cls in MODEL_TABLES:
             try:
@@ -96,14 +105,13 @@ async def run_sqlite_restore(session: AsyncSession = None, sqlite_path: str = No
                     cleaned = {k: clean_value(v, k) for k, v in r.items()}
                     obj = model_cls(**cleaned)
                     await session.merge(obj)
-                await session.flush()
+                await session.commit()
                 summary[table_name] = len(rows)
                 total_count += len(rows)
             except Exception as e:
+                await session.rollback()
                 print(f"Warning importing table {table_name}: {e}")
                 summary[table_name] = f"error: {str(e)}"
-        
-        await session.commit()
     finally:
         sqlite_conn.close()
         if should_close_session:
